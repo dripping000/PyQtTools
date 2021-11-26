@@ -1,0 +1,7 @@
+{
+    "python.pythonPath": "C:\\Users\\mengkun\\Anaconda3\\envs\\Qt\\python.exe",
+
+    "python.linting.pylintArgs": [
+        "--extension-pkg-whitelist=PySide2,cv2"
+    ]
+}
