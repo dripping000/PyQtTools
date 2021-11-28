@@ -21,19 +21,19 @@ class ImageTools(MainWindow):
         super().__init__()
 
         self.subwindows_ui = self.ui.mdiArea
-        self.subwindows_ui.setStyleSheet("QTabBar::tab { height: 30px;}")
+        self.subwindows_ui.setStyleSheet("QTabBar::tab { height: 30px;}")  # 设置TabWidget高度固定
 
         # 界面控制
-        self.ui.qAction_RawImageEditor.triggered.connect(self.add_subwindow_RawImageEditor)
         self.ui.qAction_clear_cache.triggered.connect(self.clear_cache)
+
+        self.ui.qAction_RawImageEditor.triggered.connect(self.add_subwindow_RawImageEditor)
 
         self.ui.qAction_DebugMK.triggered.connect(self.test)  # [DebugMK]
 
+        self.ImageTools_Init()
 
-    def show(self):
-        super().show()
 
-        # 界面Init
+    def ImageTools_Init(self):
         self.load_subwindows_cache()
 
 
@@ -42,10 +42,6 @@ class ImageTools(MainWindow):
         self.subwindows_ui.addSubWindow(sub_window)
         self.sub_windows.append(sub_window)
         sub_window.show()
-
-
-    def add_subwindow_RawImageEditor(self):
-        self.add_subwindow("RawImageEditor")
 
 
     def load_subwindows_cache(self):
@@ -58,10 +54,15 @@ class ImageTools(MainWindow):
         info("缓存删除成功！\r\n请重启软件", self)
 
 
+    def add_subwindow_RawImageEditor(self):
+        self.add_subwindow("RawImageEditor")
+
+
     def test(self):  # [DebugMK]
-        print("test")
+        print("test_begin")
         test_copy_dll()
         test_python_call_c()
+        print("test_end")
 
 
 if __name__ == "__main__":

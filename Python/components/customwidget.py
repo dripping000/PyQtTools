@@ -28,17 +28,18 @@ class ImageView(QGraphicsView):
     signalmouseMoveEvent = pyqtSignal(QPointF)
     signalWheelEvent = pyqtSignal(float)
     signalDragEvent = pyqtSignal(str)
-    MousePosition = None
-
 
     def __init__(self, scene, parent=None):
         super().__init__(scene, parent)
-        self.setupUi_()
 
-        self.scale_ratio = 1.0
+        # 成员变量
+        self.__MousePosition = None
+        self.__scale_ratio = 1.0
+
+        self.ImageView_Init()
 
 
-    def setupUi_(self):
+    def ImageView_Init(self):
         self.setMouseTracking(True)     # 支持鼠标跟踪
 
         self.setAcceptDrops(True)       # 支持鼠标拖动图片
@@ -77,23 +78,23 @@ class ImageView(QGraphicsView):
 
 
     def mouseMoveEvent(self, event):
-        self.MousePosition = self.mapToScene(event.pos())
-        self.signalmouseMoveEvent.emit(self.MousePosition)
+        self.__MousePosition = self.mapToScene(event.pos())
+        self.signalmouseMoveEvent.emit(self.__MousePosition)
         return super().mouseMoveEvent(event)
 
 
     def wheelEvent(self, event):
-        self.centerOn(self.MousePosition)  # 鼠标滚轮放大缩小以当前坐标为中心
+        self.centerOn(self.__MousePosition)  # 鼠标滚轮放大缩小以当前坐标为中心
 
         angle = event.angleDelta().y()
         if (angle > 0):
             self.scale(1.2, 1.2)
-            self.scale_ratio *= 1.2
+            self.__scale_ratio *= 1.2
         else:
             self.scale(0.8, 0.8)
-            self.scale_ratio *= 0.8
+            self.__scale_ratio *= 0.8
 
-        self.signalWheelEvent.emit(self.scale_ratio)
+        self.signalWheelEvent.emit(self.__scale_ratio)
         return super().wheelEvent(event)
 
 

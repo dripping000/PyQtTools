@@ -10,19 +10,18 @@ import tools.rawimageeditor.ispfunction as ispfunction
 
 class IspPipeline():
 
-    def __init__(self, parmas, process_bar=None):
+    def __init__(self, parmas, qProgressBar=None):
         # 成员变量
-        self.params = parmas
-        self.process_bar = process_bar
+        self.IspPipeline_params = parmas
+        self.IspPipeline_qProgressBar = qProgressBar
 
         self.pipeline = []
         self.old_pipeline = []
 
-        # RawImageInfo_list存储了IspPipeline中途所有的图像，RawImageInfo_list长度比IspPipeline长1
-        self.RawImageInfo_list = [RawImageInfo()]
-
-        self.RawImageInfo_list_mutex = Lock()
-        self.c_ISPProc = ISPProc(self.params, self.RawImageInfo_list, self.RawImageInfo_list_mutex)
+        # IspPipeline_list存储了IspPipeline中途所有的图像，IspPipeline_list长度比IspPipeline长1
+        self.IspPipeline_list = [RawImageInfo()]
+        self.IspPipeline_list_mutex = Lock()
+        self.c_ISPProc = ISPProc(self.IspPipeline_params, self.IspPipeline_list, self.IspPipeline_list_mutex)
 
 
     def reload_pipeline(self):
@@ -32,19 +31,19 @@ class IspPipeline():
         reload(ispfunction.isp)
         reload(ispfunction)
 
-        self.params.need_flush = True
-        if (self.process_bar is not None):
-            self.process_bar.setValue(0)
+        self.IspPipeline_params.need_flush = True
+        if (self.IspPipeline_qProgressBar is not None):
+            self.IspPipeline_qProgressBar.setValue(0)
 
 
     def reset_pipeline(self):
         """
         func: 重新开始一个pipeline，把以前的图像清除
         """
-        if(len(self.RawImageInfo_list) > 1):
-            self.RawImageInfo_list_mutex.acquire()
-            self.RawImageInfo_list = [RawImageInfo()]
-            self.RawImageInfo_list_mutex.release()
+        if(len(self.IspPipeline_list) > 1):
+            self.IspPipeline_list_mutex.acquire()
+            self.IspPipeline_list = [RawImageInfo()]
+            self.IspPipeline_list_mutex.release()
 
             self.old_pipeline = []
             self.pipeline = []
@@ -148,10 +147,10 @@ class IspPipeline():
         """
         index = index + 1
 
-        self.RawImageInfo_list_mutex.acquire()
-        while index < len(self.RawImageInfo_list):
-            self.RawImageInfo_list.pop()
-        self.RawImageInfo_list_mutex.release()
+        self.IspPipeline_list_mutex.acquire()
+        while index < len(self.IspPipeline_list):
+            self.IspPipeline_list.pop()
+        self.IspPipeline_list_mutex.release()
 
 
     def get_RawImageInfo(self, index):
@@ -161,14 +160,14 @@ class IspPipeline():
         """
         RawImageInfo_ = None
 
-        self.RawImageInfo_list_mutex.acquire()
+        self.IspPipeline_list_mutex.acquire()
 
-        if (index >= 0 and index < len(self.RawImageInfo_list)):
-            RawImageInfo_ = self.RawImageInfo_list[index]
-        elif (index < 0 and len(self.pipeline) + 1 + index < len(self.RawImageInfo_list)):
-            RawImageInfo_ = self.RawImageInfo_list[len(self.pipeline) + 1 + index]
+        if (index >= 0 and index < len(self.IspPipeline_list)):
+            RawImageInfo_ = self.IspPipeline_list[index]
+        elif (index < 0 and len(self.pipeline) + 1 + index < len(self.IspPipeline_list)):
+            RawImageInfo_ = self.IspPipeline_list[len(self.pipeline) + 1 + index]
 
-        self.RawImageInfo_list_mutex.release()
+        self.IspPipeline_list_mutex.release()
 
         if(RawImageInfo_ is not None):
             return RawImageInfo_

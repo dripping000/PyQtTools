@@ -50,11 +50,10 @@ class MainWindow(QMainWindow):
         self.sub_windows = []
 
         self.clear_cache_flag = False
-        self.file_name = CACHE_FILEPATH + "QtToolsSubWindows.tmp"
         self.subwindows_cache = []
+        self.__file_name = CACHE_FILEPATH + "QtToolsSubWindows.tmp"
 
-        # Init
-        self.subwindows_cache = load_pickle(self.subwindows_cache, self.file_name)
+        self.MainWindow_Init()
 
 
     def closeEvent(self, event):
@@ -74,13 +73,17 @@ class MainWindow(QMainWindow):
                         self.subwindows_cache.append(self.sub_windows[0].name)
                         self.sub_windows[0].close()
 
-                write_pickle(self.subwindows_cache, self.file_name)
+                write_pickle(self.subwindows_cache, self.__file_name)
             else:
                 delete_folder(CACHE_FILEPATH)
 
             event.accept()
         else:
             event.ignore()
+
+
+    def MainWindow_Init(self):
+        self.subwindows_cache = load_pickle(self.subwindows_cache, self.__file_name)
 
 
 class SubWindow(QMainWindow):
@@ -96,11 +99,13 @@ class SubWindow(QMainWindow):
         self.parent = parent
 
         self.params = None
-        self.file_name = CACHE_FILEPATH + name + ".tmp"
+        self.__file_name = CACHE_FILEPATH + name + ".tmp"
 
-        # Init
         if (True == qProgressBar):
             self.qProgressBar = QProgressBar()
+            self.qProgressBar.setRange(0, 100)
+            self.qProgressBar.setValue(0)
+
             self.qLabel_info = QLabel()
             self.qLable_time = QLabel()
 
@@ -108,12 +113,9 @@ class SubWindow(QMainWindow):
             self.ui.statusBar.addPermanentWidget(self.qLable_time, stretch=1)
             self.ui.statusBar.addPermanentWidget(self.qProgressBar, stretch=2)
 
-            self.qProgressBar.setRange(0, 100)
-            self.qProgressBar.setValue(0)
-
 
     def load_params(self, init_params):
-        self.params = load_pickle(self.params, self.file_name)
+        self.params = load_pickle(self.params, self.__file_name)
 
         if self.params == None:
             self.params = init_params
@@ -123,16 +125,7 @@ class SubWindow(QMainWindow):
 
     def closeEvent(self, event):
         create_folder(CACHE_FILEPATH)
-
-        write_pickle(self.params, self.file_name)
-
-        # [DebugMK]
-        # try:
-        #     self.parent.sub_windows.remove(self)
-        # except Exception:
-        #     print("{}工具不支持记忆存储".format(self.name))  # [DebugMK]
-
-        # self.name = None  # [DebugMK]
+        write_pickle(self.params, self.__file_name)
 
         self.parent.sub_windows.remove(self)
 
