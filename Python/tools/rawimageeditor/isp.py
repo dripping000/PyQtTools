@@ -1,4 +1,4 @@
-from tools.rawimageeditor.RawImageInfo import RawImageInfo
+from tools.rawimageeditor.ImageInfo import ImageInfo
 from tools.rawimageeditor.RawImageEditorParams import RawImageEditorParams
 
 import numpy as np
@@ -7,16 +7,16 @@ import ctypes
 from common import *
 
 
-def get_src_raw_data(raw: RawImageInfo, params: RawImageEditorParams):
+def get_src_raw_data(raw: ImageInfo, params: RawImageEditorParams):
     filename = params.rawformat.filename
     width = params.rawformat.width
     height = params.rawformat.height
     bit_depth = params.rawformat.bit_depth
 
-    ret_img = RawImageInfo()
+    ret_img = ImageInfo()
     if (filename != "" and width != 0 and height != 0 and bit_depth != 0):
         ret_img.set_color_space("raw")
-        ret_img.set_pattern(params.rawformat.pattern)
+        ret_img.set_raw_pattern(params.rawformat.pattern)
         ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
         ret_img.load_data(filename, width, height, bit_depth)
         return ret_img
@@ -49,10 +49,10 @@ class TBLCParam(ctypes.Structure):
     ]
 
 
-def IspBLC(raw: RawImageInfo, params: RawImageEditorParams):
+def IspBLC(raw: ImageInfo, params: RawImageEditorParams):
     black_level = params.blc.black_level
 
-    pattern_value = get_pattern_value(raw.get_pattern())
+    pattern_value = get_pattern_value(raw.get_raw_pattern())
     bit_depth_src = raw.get_bit_depth_src()
 
     width = raw.get_width()
@@ -76,7 +76,7 @@ def IspBLC(raw: RawImageInfo, params: RawImageEditorParams):
     ret = dll.interface_BLC(tBLCParam, data_p)
     DEBUGMK(sys._getframe().f_code.co_name, __file__, str(sys._getframe().f_lineno), "interface_BLC_ret={}".format(ret))
 
-    ret_img = RawImageInfo()
+    ret_img = ImageInfo()
     ret_img.data = data
     return ret_img
 
@@ -93,8 +93,8 @@ class TInterpolationParam(ctypes.Structure):
     ]
 
 
-def demosaic(raw: RawImageInfo, params: RawImageEditorParams):
-    pattern_value = get_pattern_value(raw.get_pattern())
+def demosaic(raw: ImageInfo, params: RawImageEditorParams):
+    pattern_value = get_pattern_value(raw.get_raw_pattern())
     bit_depth_src = raw.get_bit_depth_src()
 
     width = raw.get_width()
@@ -121,7 +121,7 @@ def demosaic(raw: RawImageInfo, params: RawImageEditorParams):
     ret = dll.interface_interpolation(tInterpolationParam, data_in_p, data_out_p)
     DEBUGMK(sys._getframe().f_code.co_name, __file__, str(sys._getframe().f_lineno), "interface_interpolation_ret={}".format(ret))
 
-    ret_img = RawImageInfo()
+    ret_img = ImageInfo()
     ret_img.set_color_space("RGB")
     ret_img.data = data_out
     return ret_img
@@ -140,7 +140,7 @@ class TAWBParam(ctypes.Structure):
     ]
 
 
-def IspAWB(raw: RawImageInfo, params: RawImageEditorParams):
+def IspAWB(raw: ImageInfo, params: RawImageEditorParams):
     awb_gain = params.awb.awb_gain
     bit_depth_src = raw.get_bit_depth_src()
 
@@ -169,7 +169,7 @@ def IspAWB(raw: RawImageInfo, params: RawImageEditorParams):
     ret = dll.interface_AWB(tAWBParam, data_in_p, data_out_p)
     DEBUGMK(sys._getframe().f_code.co_name, __file__, str(sys._getframe().f_lineno), "interface_AWB_ret={}".format(ret))
 
-    ret_img = RawImageInfo()
+    ret_img = ImageInfo()
     ret_img.set_color_space("RGB")
     ret_img.data = data_out
     return ret_img

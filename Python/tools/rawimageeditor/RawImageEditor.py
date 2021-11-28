@@ -10,7 +10,7 @@ import os
 from components.window import SubWindow
 from components.customwidget import ImageView
 
-from tools.rawimageeditor.RawImageInfo import RawImageInfo
+from tools.rawimageeditor.ImageInfo import ImageInfo
 from tools.rawimageeditor.isppipeline import ISPPipeline
 
 
@@ -28,7 +28,7 @@ class RawImageEditor(SubWindow):
 
         self.c_IspPipeline = ISPPipeline(self.RawImageEditor_params, qProgressBar=self.qProgressBar)
 
-        self.c_ImageInfo = RawImageInfo()
+        self.c_ImageInfo = ImageInfo()
         self.c_display_image = None
 
         self.__x = None
@@ -139,7 +139,7 @@ class RawImageEditor(SubWindow):
         """
         if(self.__point_value.size == 1):
             self.qLabel_info.setText(
-                "x:{},y:{} : {}: 亮度:{} 缩放比例:{}%".format(self.__x, self.__y, self.c_ImageInfo.get_data_point_pattern(self.__y, self.__x).upper(), self.__point_value, self.__scale_ratio))
+                "x:{},y:{} : {}: 亮度:{} 缩放比例:{}%".format(self.__x, self.__y, self.c_ImageInfo.get_data_point_raw_pattern(self.__y, self.__x).upper(), self.__point_value, self.__scale_ratio))
 
         elif(self.__point_value.size == 3):  # [DebugMK]
             if(self.c_ImageInfo.get_color_space() == 'RGB'):

@@ -4,7 +4,7 @@ import time
 from imp import reload
 from threading import Lock
 
-from tools.rawimageeditor.RawImageInfo import RawImageInfo
+from tools.rawimageeditor.ImageInfo import ImageInfo
 import tools.rawimageeditor.ispfunction as ispfunction
 
 
@@ -19,7 +19,7 @@ class ISPPipeline():
         self.old_pipeline = []
 
         # IspPipeline_list存储了IspPipeline中途所有的图像，IspPipeline_list长度比IspPipeline长1
-        self.ISPPipeline_list = [RawImageInfo()]
+        self.ISPPipeline_list = [ImageInfo()]
         self.ISPPipeline_list_mutex = Lock()
         self.c_ISPProc = ISPProc(self.ISPPipeline_params, self.ISPPipeline_list, self.ISPPipeline_list_mutex)
 
@@ -96,7 +96,7 @@ class ISPPipeline():
         if(RawImageInfo_ is not None):
             return RawImageInfo_
         else:
-            return RawImageInfo()
+            return ImageInfo()
 
 
     def reload_pipeline(self):
@@ -118,7 +118,7 @@ class ISPPipeline():
         if(len(self.ISPPipeline_list) > 1):
             self.ISPPipeline_list_mutex.acquire()
             self.remove_IspPipeline_list(-1)  # 清空IspPipeline_list
-            self.ISPPipeline_list = [RawImageInfo()]
+            self.ISPPipeline_list = [ImageInfo()]
             self.ISPPipeline_list_mutex.release()
 
             self.clear_pipeline()

@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 
-class RawImageInfo():
+class ImageInfo():
     def __init__(self):
         self.rgb_pattern = {
             'r':2,
@@ -15,7 +15,7 @@ class RawImageInfo():
 
         self.raw_pattern = "gbrg"
         self.bit_depth_src = 12
-        self.bit_depth_dst = 12  # raw图数据位深小于14bit归一化到14bit
+        self.bit_depth_dst = 12  # raw图数据位深小于12bit归一化到12bit
         self.max_data = (1 << self.bit_depth_dst) - 1
 
         self.filename = ""
@@ -32,7 +32,7 @@ class RawImageInfo():
         所以在RawImageInfor将原始raw图统一对齐为14bit
         """
         if(height > 0 and width > 0):
-            self.data = np.fromfile(filename, dtype="uint16", sep="").reshape((height, width))
+            self.data = np.fromfile(filename, dtype="uint16").reshape((height, width))
 
         if (self.data is not None):
             self.filename = filename.split('/')[-1]
@@ -40,7 +40,7 @@ class RawImageInfo():
             self.bit_depth_src = bit_depth
 
             if(np.issubdtype(self.data_type, np.integer)):  # https://blog.csdn.net/archimekai/article/details/107188494
-                if (self.bit_depth_src < 14):
+                if (self.bit_depth_src < 12):
                     self.data = np.left_shift(self.data, self.bit_depth_dst - self.bit_depth_src)
                 self.max_data = (1 << self.bit_depth_dst) - 1
             else:
@@ -62,7 +62,7 @@ class RawImageInfo():
         cv2.imencode('.jpg', self.display_data)[1].tofile(filename)
 
 
-    def get_data_point_pattern(self, y, x):
+    def get_data_point_raw_pattern(self, y, x):
         return self.raw_pattern[(y % 2) * 2 + x % 2]
 
 
@@ -130,10 +130,10 @@ class RawImageInfo():
         return self.color_space
 
 
-    def set_pattern(self, bayer_pattern):
+    def set_raw_pattern(self, bayer_pattern):
         self.raw_pattern = bayer_pattern
 
-    def get_pattern(self):
+    def get_raw_pattern(self):
         return self.raw_pattern
 
 
