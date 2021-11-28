@@ -25,6 +25,7 @@ def critical(string: str, parent=None):
 
 
 class ImageView(QGraphicsView):
+
     signalmouseMoveEvent = pyqtSignal(QPointF)
     signalWheelEvent = pyqtSignal(float)
     signalDragEvent = pyqtSignal(str)

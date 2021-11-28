@@ -8,56 +8,20 @@ from tools.rawimageeditor.RawImageInfo import RawImageInfo
 import tools.rawimageeditor.ispfunction as ispfunction
 
 
-class IspPipeline():
+class ISPPipeline():
 
     def __init__(self, parmas, qProgressBar=None):
         # 成员变量
-        self.IspPipeline_params = parmas
-        self.IspPipeline_qProgressBar = qProgressBar
+        self.ISPPipeline_params = parmas
+        self.ISPPipeline_qProgressBar = qProgressBar
 
         self.pipeline = []
         self.old_pipeline = []
 
         # IspPipeline_list存储了IspPipeline中途所有的图像，IspPipeline_list长度比IspPipeline长1
-        self.IspPipeline_list = [RawImageInfo()]
-        self.IspPipeline_list_mutex = Lock()
-        self.c_ISPProc = ISPProc(self.IspPipeline_params, self.IspPipeline_list, self.IspPipeline_list_mutex)
-
-
-    def reload_pipeline(self):
-        """
-        func: 热更新 重载ISP算法模块
-        """
-        reload(ispfunction.isp)
-        reload(ispfunction)
-
-        self.IspPipeline_params.need_flush = True
-        if (self.IspPipeline_qProgressBar is not None):
-            self.IspPipeline_qProgressBar.setValue(0)
-
-
-    def reset_pipeline(self):
-        """
-        func: 重新开始一个pipeline，把以前的图像清除
-        """
-        if(len(self.IspPipeline_list) > 1):
-            self.IspPipeline_list_mutex.acquire()
-            self.IspPipeline_list = [RawImageInfo()]
-            self.IspPipeline_list_mutex.release()
-
-            self.old_pipeline = []
-            self.pipeline = []
-            return True
-        return False
-
-
-    def set_pipeline(self, pipeline):
-        self.old_pipeline = self.pipeline
-        self.pipeline = pipeline
-
-
-    def clear_pipeline(self):
-        self.set_pipeline([])
+        self.ISPPipeline_list = [RawImageInfo()]
+        self.ISPPipeline_list_mutex = Lock()
+        self.c_ISPProc = ISPProc(self.ISPPipeline_params, self.ISPPipeline_list, self.ISPPipeline_list_mutex)
 
 
     def add_pipeline_node(self, node):
@@ -79,6 +43,15 @@ class IspPipeline():
             return -1
 
 
+    def set_pipeline(self, pipeline):
+        self.old_pipeline = self.pipeline
+        self.pipeline = pipeline
+
+
+    def clear_pipeline(self):
+        self.set_pipeline([])
+
+
     def compare_pipeline(self):
         """
         func: 对比新老pipeline的区别
@@ -92,41 +65,101 @@ class IspPipeline():
         return -1
 
 
+    def remove_IspPipeline_list(self, index):
+        """
+        func: 去除>=index之后的node，由于image的长度比pipeline多1，因此需要将index+1
+        """
+        index = index + 1
+
+        self.ISPPipeline_list_mutex.acquire()
+        while index < len(self.ISPPipeline_list):
+            self.ISPPipeline_list.pop()
+        self.ISPPipeline_list_mutex.release()
+
+
+    def get_IspPipeline_list(self, index):
+        """
+        func: 获取pipeline中的一幅图像
+        如果输入-1，则返回最后一幅图像
+        """
+        RawImageInfo_ = None
+
+        self.ISPPipeline_list_mutex.acquire()
+
+        if (index >= 0 and index < len(self.ISPPipeline_list)):
+            RawImageInfo_ = self.ISPPipeline_list[index]
+        elif (index < 0 and len(self.pipeline) + 1 + index < len(self.ISPPipeline_list)):
+            RawImageInfo_ = self.ISPPipeline_list[len(self.pipeline) + 1 + index]
+
+        self.ISPPipeline_list_mutex.release()
+
+        if(RawImageInfo_ is not None):
+            return RawImageInfo_
+        else:
+            return RawImageInfo()
+
+
+    def reload_pipeline(self):
+        """
+        func: 热更新 重载ISP算法模块
+        """
+        reload(ispfunction.isp)
+        reload(ispfunction)
+
+        self.ISPPipeline_params.need_flush = True
+        if (self.ISPPipeline_qProgressBar is not None):
+            self.ISPPipeline_qProgressBar.setValue(0)
+
+
+    def reset_pipeline(self):
+        """
+        func: 重新开始一个pipeline，把以前的图像清除
+        """
+        if(len(self.ISPPipeline_list) > 1):
+            self.ISPPipeline_list_mutex.acquire()
+            self.remove_IspPipeline_list(-1)  # 清空IspPipeline_list
+            self.ISPPipeline_list = [RawImageInfo()]
+            self.ISPPipeline_list_mutex.release()
+
+            self.clear_pipeline()
+            return True
+        return False
+
+
     def check_pipeline(self):
         """
         func: 检查pipeline，如果有不同的，修改img_list
         ret: 如果pipeline不需要修改，就返回None，如果需要修改，就返回需要修改的pipeline
         """
-        self.remove_RawImageInfo(0)
-        return self.pipeline
+        # [DebugMK]
+        # self.remove_IspPipeline_list(0)
+        # return self.pipeline
 
-        index_compare_pipeline = self.compare_pipeline()  # pipeline是否发生变化
+        index_min = -1
+        index_compare_pipeline = -1
+        index_need_flush = -1
 
-        if(self.params.need_flush == True):  # 界面参数发生变化
-            self.params.need_flush = False
+        index_compare_pipeline = self.compare_pipeline()
 
-            if(len(self.params.need_flush_isp) > 0):
-                index = self.get_pipeline_node_index(self.params.need_flush_isp[0])
-                if(index != -1):  # 有效ISP模块
-                    if(index_compare_pipeline != -1):
-                        min_index = min(index_compare_pipeline, index)
-                        self.remove_RawImageInfo(min_index)
-                        return self.pipeline[min_index:]
-                    else:
-                        return self.pipeline[index:]
+        if(self.ISPPipeline_params.need_flush == True):
+            self.ISPPipeline_params.need_flush = False
 
-                else:  # 无效ISP模块
-                    return None
+            if(len(self.ISPPipeline_params.need_flush_isp) > 0):
+                index_need_flush = self.get_pipeline_node_index(self.ISPPipeline_params.need_flush_isp[0])
 
+        if index_compare_pipeline == -1:                                    # pipeline未发生变化
+            if index_need_flush == -1:                                      # pipeline未发生变化，界面参数未发生变化
+                return None
+            else:                                                           # pipeline未发生变化，界面参数发生变化
+                index_min = index_need_flush
+        else:                                                               # pipeline发生变化
+            if index_need_flush == -1:
+                index_min = index_compare_pipeline                          # pipeline发生变化，界面参数未发生变化
             else:
-                self.remove_RawImageInfo(0)
-                return self.pipeline
+                index_min = min(index_compare_pipeline, index_need_flush)   # pipeline发生变化，界面参数发生变化
 
-        else:  # 界面参数未发生变化
-            if(index_compare_pipeline != -1):
-                self.remove_RawImageInfo(index_compare_pipeline)
-                return self.pipeline[index_compare_pipeline:]
-            return None
+        self.remove_IspPipeline_list(index_min)
+        return self.pipeline[index_min:]
 
 
     def run_pipeline(self):
@@ -136,43 +169,9 @@ class IspPipeline():
         pipeline = self.check_pipeline()
         print(pipeline)
 
-        self.c_ISPProc.set_pipeline(pipeline)
-        # self.ispProcthread.start()  # [DebugMK]
+        self.c_ISPProc.set_proc_pipeline(pipeline)
+        # self.c_ISPProc.start()  # [DebugMK]
         self.c_ISPProc.run_DebugMK()
-
-
-    def remove_RawImageInfo(self, index):
-        """
-        func: 去除>=index之后的node，由于image的长度比pipeline多1，因此需要将index+1
-        """
-        index = index + 1
-
-        self.IspPipeline_list_mutex.acquire()
-        while index < len(self.IspPipeline_list):
-            self.IspPipeline_list.pop()
-        self.IspPipeline_list_mutex.release()
-
-
-    def get_RawImageInfo(self, index):
-        """
-        func: 获取pipeline中的一幅图像
-        如果输入-1，则返回最后一幅图像
-        """
-        RawImageInfo_ = None
-
-        self.IspPipeline_list_mutex.acquire()
-
-        if (index >= 0 and index < len(self.IspPipeline_list)):
-            RawImageInfo_ = self.IspPipeline_list[index]
-        elif (index < 0 and len(self.pipeline) + 1 + index < len(self.IspPipeline_list)):
-            RawImageInfo_ = self.IspPipeline_list[len(self.pipeline) + 1 + index]
-
-        self.IspPipeline_list_mutex.release()
-
-        if(RawImageInfo_ is not None):
-            return RawImageInfo_
-        else:
-            return RawImageInfo()
 
 
 class ISPProc(QThread):
@@ -183,37 +182,36 @@ class ISPProc(QThread):
     errorCB = pyqtSignal(str)
 
 
-    def __init__(self, params, RawImageInfo_list, RawImageInfo_list_mutex:Lock, parent=None):
-        super(ISPProc, self).__init__(parent)
+    def __init__(self, params, list, list_mutex:Lock):
+        super().__init__()
 
-        self.params = params
-        self.RawImageInfo_list = RawImageInfo_list
-        self.RawImageInfo_list_mutex = RawImageInfo_list_mutex
+        self.__params = params
+        self.__list = list
+        self.__list_mutex = list_mutex
 
-        self.pipeline = None
+        self.__pipeline = None
 
 
-    def set_pipeline(self, pipeline):
-        self.pipeline = pipeline
+    def set_proc_pipeline(self, pipeline):
+        self.__pipeline = pipeline
 
 
     def run_node(self, node, data):
-        # 这里进行检查之后，后续就不需要检查了
-        if(data is not None and self.params is not None):
-            return ispfunction.pipeline_dict[node](data, self.params)
+        if(data is not None and self.__params is not None):
+            return ispfunction.pipeline_dict[node](data, self.__params)
 
 
     def run_DebugMK(self):
         self.processRateCB.emit(0)
 
-        if (self.pipeline is not None):
+        if (self.__pipeline is not None):
             i = 1
-            length = len(self.pipeline)
+            length = len(self.__pipeline)
 
             start_time = time.time()
 
-            for node in self.pipeline:
-                data = self.RawImageInfo_list[-1]
+            for node in self.__pipeline:
+                data = self.__list[-1]
                 try:
                     RawImageInfo_ = self.run_node(node, data)
                 except Exception as e:
@@ -221,9 +219,9 @@ class ISPProc(QThread):
                     return
 
                 if(RawImageInfo_ is not None):
-                    self.RawImageInfo_list_mutex.acquire()
-                    self.RawImageInfo_list.append(RawImageInfo_)
-                    self.RawImageInfo_list_mutex.release()
+                    self.__list_mutex.acquire()
+                    self.__list.append(RawImageInfo_)
+                    self.__list_mutex.release()
                 else:
                     break
 

@@ -4,7 +4,7 @@ import cv2
 
 class RawImageInfo():
     def __init__(self):
-        self.rgb_pattern_dict = {
+        self.rgb_pattern = {
             'r':2,
             'g':1,
             'b':0
@@ -13,7 +13,7 @@ class RawImageInfo():
 
         self.color_space = "raw"  # "raw" "RGB" "YCrCb"
 
-        self.pattern = "gbrg"
+        self.raw_pattern = "gbrg"
         self.bit_depth_src = 12
         self.bit_depth_dst = 12  # raw图数据位深小于14bit归一化到14bit
         self.max_data = (1 << self.bit_depth_dst) - 1
@@ -63,7 +63,7 @@ class RawImageInfo():
 
 
     def get_data_point_pattern(self, y, x):
-        return self.pattern[(y % 2) * 2 + x % 2]
+        return self.raw_pattern[(y % 2) * 2 + x % 2]
 
 
     def get_data_point(self, x, y):
@@ -131,10 +131,10 @@ class RawImageInfo():
 
 
     def set_pattern(self, bayer_pattern):
-        self.pattern = bayer_pattern
+        self.raw_pattern = bayer_pattern
 
     def get_pattern(self):
-        return self.pattern
+        return self.raw_pattern
 
 
     def set_bit_depth_src(self, bit_depth):
@@ -161,22 +161,22 @@ class RawImageInfo():
 
 
     def bayer_channel_separation(self):
-        if (self.pattern == "rggb"):
+        if (self.raw_pattern == "rggb"):
             R = self.data[::2, ::2]
             Gr = self.data[::2, 1::2]
             Gb = self.data[1::2, ::2]
             B = self.data[1::2, 1::2]
-        elif (self.pattern == "grbg"):
+        elif (self.raw_pattern == "grbg"):
             Gr = self.data[::2, ::2]
             R = self.data[::2, 1::2]
             B = self.data[1::2, ::2]
             Gb = self.data[1::2, 1::2]
-        elif (self.pattern == "gbrg"):
+        elif (self.raw_pattern == "gbrg"):
             Gb = self.data[::2, ::2]
             B = self.data[::2, 1::2]
             R = self.data[1::2, ::2]
             Gr = self.data[1::2, 1::2]
-        elif (self.pattern == "bggr"):
+        elif (self.raw_pattern == "bggr"):
             B = self.data[::2, ::2]
             Gb = self.data[::2, 1::2]
             Gr = self.data[1::2, ::2]
@@ -222,17 +222,17 @@ class RawImageInfo():
     def convert_bayer2rgbuint8(self):
         data = np.zeros((self.get_height(), self.get_width(), 3), dtype="uint8")
 
-        if (self.pattern == "rggb" or self.pattern == "grbg" or self.pattern == "gbrg" or self.pattern == "bggr"):
+        if (self.raw_pattern == "rggb" or self.raw_pattern == "grbg" or self.raw_pattern == "gbrg" or self.raw_pattern == "bggr"):
             if(np.issubdtype(self.data_type, np.integer)):
                 right_shift_num = self.get_bit_depth_dst() - 8
 
-                for channel, (y, x) in zip(self.pattern, [(0, 0), (0, 1), (1, 0), (1, 1)]):
-                    data[y::2, x::2, self.rgb_pattern_dict[channel]] = np.right_shift(self.data[y::2, x::2], right_shift_num)
+                for channel, (y, x) in zip(self.raw_pattern, [(0, 0), (0, 1), (1, 0), (1, 1)]):
+                    data[y::2, x::2, self.rgb_pattern[channel]] = np.right_shift(self.data[y::2, x::2], right_shift_num)
             else:
                 ratio = 256/(self.max_data + 1)
 
-                for channel, (y, x) in zip(self.pattern, [(0, 0), (0, 1), (1, 0), (1, 1)]):
-                    data[y::2, x::2, self.rgb_pattern_dict[channel]] = np.uint8(self.data[y::2, x::2] * ratio)
+                for channel, (y, x) in zip(self.raw_pattern, [(0, 0), (0, 1), (1, 0), (1, 1)]):
+                    data[y::2, x::2, self.rgb_pattern[channel]] = np.uint8(self.data[y::2, x::2] * ratio)
             return data
         else:
             print("pattern must be one of these: rggb, grbg, gbrg, bggr")

@@ -11,7 +11,7 @@ from components.window import SubWindow
 from components.customwidget import ImageView
 
 from tools.rawimageeditor.RawImageInfo import RawImageInfo
-from tools.rawimageeditor.isppipeline import IspPipeline
+from tools.rawimageeditor.isppipeline import ISPPipeline
 
 
 class RawImageEditor(SubWindow):
@@ -26,7 +26,7 @@ class RawImageEditor(SubWindow):
         # 成员变量
         self.RawImageEditor_params = self.load_params(RawImageEditorParams())
 
-        self.c_IspPipeline = IspPipeline(self.RawImageEditor_params, qProgressBar=self.qProgressBar)
+        self.c_IspPipeline = ISPPipeline(self.RawImageEditor_params, qProgressBar=self.qProgressBar)
 
         self.c_ImageInfo = RawImageInfo()
         self.c_display_image = None
@@ -113,7 +113,7 @@ class RawImageEditor(SubWindow):
 
 
     def update_display_image(self):
-        self.c_ImageInfo = self.c_IspPipeline.get_RawImageInfo(-1)
+        self.c_ImageInfo = self.c_IspPipeline.get_IspPipeline_list(-1)
         self.display_image(self.c_ImageInfo)
 
 
