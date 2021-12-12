@@ -4,6 +4,8 @@ from tools.rawimageeditor.RawImageEditorParams import RawImageEditorParams
 import numpy as np
 import ctypes
 
+import tools.rawimageeditor.isp_utils.isp_dpc as isp_dpc
+
 from common import *
 
 
@@ -75,6 +77,34 @@ def IspBLC(raw: ImageInfo, params: RawImageEditorParams):
         )
     ret = dll.interface_BLC(tBLCParam, data_p)
     DEBUGMK(sys._getframe().f_code.co_name, __file__, str(sys._getframe().f_lineno), "interface_BLC_ret={}".format(ret))
+
+    ret_img = ImageInfo()
+    ret_img.data = data
+    return ret_img
+
+
+""" IspGain """
+def IspGain(raw: ImageInfo, params: RawImageEditorParams):
+    digital_gain = params.digital_gain_params.digital_gain
+
+    data = raw.get_data().copy()
+
+    data = data * digital_gain
+    data = np.clip(data, 0, raw.max_data)
+
+    ret_img = ImageInfo()
+    ret_img.data = data
+    return ret_img
+
+
+""" IspDPC """
+def IspDPC(raw: ImageInfo, params: RawImageEditorParams):
+    dpc_threshold_ratio = params.dpc_params.dpc_threshold_ratio
+    dpc_method = params.dpc_params.dpc_method
+
+    data = raw.get_data().copy()
+
+    data = isp_dpc.DPC(data, dpc_threshold_ratio, dpc_method)
 
     ret_img = ImageInfo()
     ret_img.data = data

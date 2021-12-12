@@ -7,6 +7,18 @@ import ctypes
 import cv2
 
 
+def test_copy_dll():
+    try:
+        if os.path.exists("./Test.dll"):
+            os.remove("./Test.dll")
+
+        shutil.copyfile("../VS/bin/Test.dll", "./Test.dll")
+    except IOError as e:
+        print("Unable to copy file. %s" % e)
+    except:
+        print("Unexpected error:", sys.exc_info())
+
+
 class TStruct(ctypes.Structure):
     _fields_ = [
         ("width", ctypes.c_int),
@@ -35,33 +47,16 @@ def test_python_call_c():
     ret = dll.test_struct(ctypes.POINTER(TStruct)(tStruct))
     print(ret)
 
-    dll.test_OpenVino.argtypes = ()
-    dll.test_OpenVino.restype = ctypes.c_int
-    ret = dll.test_OpenVino()
-    print(ret)
 
-
-def test_copy_dll():
-    try:
-        if os.path.exists("./Test.dll"):
-            os.remove("./Test.dll")
-
-        shutil.copyfile("../VS/bin/Test.dll", "./Test.dll")
-    except IOError as e:
-        print("Unable to copy file. %s" % e)
-    except:
-        print("Unexpected error:", sys.exc_info())
-
-
-def test_read_gamma():
+def test_gamma():
     '''
-    with open("./Resource/Gamma/gamma_fae_mk.txt", "r") as f:
+    with open("./Resource/Gamma/gamma_sigmastar.txt", "r") as f:
         for i, line in enumerate(f.readlines()):
             if i != 0:
                 line = line.strip('\n')
                 print(line)
 
-    with open("./Resource/Gamma/gamma_hisi_int.txt", "r") as f:
+    with open("./Resource/Gamma/gamma_hisi.txt", "r") as f:
         for i, line in enumerate(f.readlines()):
             line = line.split(',')
             print(line)

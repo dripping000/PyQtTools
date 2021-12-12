@@ -102,6 +102,61 @@ class BLCParams():
             self.need_flush = True
 
 
+class DigitalGainParams():
+    def __init__(self):
+        self.digital_gain = 1.0
+
+        self.name = 'digital gain'
+        self.need_flush = False
+
+
+    def set(self, ui:Ui_ImageEditor):
+        ui.digital_gain.setValue(self.digital_gain)
+
+
+    def get(self, ui:Ui_ImageEditor):
+        self.set_digital_gain(ui.digital_gain.value())
+        return self.need_flush
+
+
+    def set_digital_gain(self, digital_gain):
+        if(digital_gain != self.digital_gain):
+            self.digital_gain = digital_gain
+            self.need_flush = True
+
+
+class DPCParams():
+    def __init__(self):
+        self.dpc_threshold_ratio = 1
+        self.dpc_method = 'mean'
+
+        self.name = 'bad pixel correction'
+        self.need_flush = False
+
+
+    def set(self, ui:Ui_ImageEditor):
+        ui.dpc_threshold_ratio.setValue(self.dpc_threshold_ratio)
+        ui.dpc_method.setCurrentText(self.dpc_method)
+
+
+    def get(self, ui:Ui_ImageEditor):
+        self.set_dpc_threshold_ratio(ui.dpc_threshold_ratio.value())
+        self.set_dpc_method(ui.dpc_method.currentText())
+        return self.need_flush
+
+
+    def set_dpc_threshold_ratio(self, dpc_threshold_ratio):
+        if(dpc_threshold_ratio != self.dpc_threshold_ratio):
+            self.dpc_threshold_ratio = dpc_threshold_ratio
+            self.need_flush = True
+
+
+    def set_dpc_method(self, dpc_method):
+        if(dpc_method != self.dpc_method):
+            self.dpc_method = dpc_method
+            self.need_flush = True
+
+
 class AWBParams():
     def __init__(self):
         self.awb_gain = [1.0, 1.0, 1.0]
@@ -135,12 +190,16 @@ class RawImageEditorParams():
         self.ui_params = [
             FormatParams(),
             BLCParams(),
+            DigitalGainParams(),
+            DPCParams(),
             AWBParams(),
         ]
 
         [
             self.rawformat,
             self.blc,
+            self.digital_gain_params,
+            self.dpc_params,
             self.awb,
         ] = self.ui_params
 
