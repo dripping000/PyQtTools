@@ -37,7 +37,7 @@ class ISPPipeline():
         """
         func: 返回该node在pipeline的index, 如果不存在，就返回-1
         """
-        if(node.lower() in self.pipeline and node.lower() in ispfunction.pipeline_dict):
+        if((node.lower() in self.pipeline) and (node.lower() in ispfunction.pipeline_dict)):
             return self.pipeline.index(node.lower())
         else:
             return -1
@@ -58,9 +58,12 @@ class ISPPipeline():
         如果不同的话，会返回一个index，表示从第index个值开始不一样的，注意这个index可能不存在于老的pipeline中
         如果相同的话，或者新isp是老isp子集，会返回-1
         """
-        for i, node in enumerate(self.pipeline):
-            if(i > len(self.old_pipeline) - 1 or node != self.old_pipeline[i]):
+        for i, node in enumerate(self.pipeline):  # pipeline相对old_pipeline多了模块；pipeline相对old_pipeline模块有差异
+            if((i > len(self.old_pipeline) - 1) or (node != self.old_pipeline[i])):
                 return i
+
+        if(len(self.pipeline) < len(self.old_pipeline)):  # pipeline相对old_pipeline少了模块（pipeline相对old_pipeline len(self.pipeline)-1位置还是相同的，所以return len(self.pipeline)）
+            return len(self.pipeline)
 
         return -1
 
@@ -69,10 +72,10 @@ class ISPPipeline():
         """
         func: 去除>=index之后的node，由于image的长度比pipeline多1，因此需要将index+1
         """
-        index = index + 1
+        index = index + 1  # 因为pipeline从0开始计数，所以需要index + 1个空间存储数据
 
         self.ISPPipeline_list_mutex.acquire()
-        while index < len(self.ISPPipeline_list):
+        while (index <= (len(self.ISPPipeline_list)-1)):  # self.ISPPipeline_list = [ImageInfo()] 因为列表第一个元素无效，所以有效个数(len(self.ISPPipeline_list)-1)
             self.ISPPipeline_list.pop()
         self.ISPPipeline_list_mutex.release()
 
@@ -145,7 +148,7 @@ class ISPPipeline():
             self.ISPPipeline_params.need_flush = False
 
             if(len(self.ISPPipeline_params.need_flush_isp) > 0):
-                index_need_flush = self.get_pipeline_node_index(self.ISPPipeline_params.need_flush_isp[0])
+                index_need_flush = self.get_pipeline_node_index(self.ISPPipeline_params.need_flush_isp[0])  # DebugMK self.ISPPipeline_params.need_flush_isp[0]不一定是pipeline最靠前的模块
 
         if index_compare_pipeline == -1:                                    # pipeline未发生变化
             if index_need_flush == -1:                                      # pipeline未发生变化，界面参数未发生变化
