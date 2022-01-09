@@ -9,6 +9,8 @@ int IspBLC(TBLCParam tInputParams, unsigned short *pBuf)
     int Height = tInputParams.Height;
     int ImgSize = tInputParams.Width * tInputParams.Height;
 
+    unsigned short Domain = tInputParams.Domain;
+
     unsigned short BlockBlc[2][2] = { 0 };
 
     switch (tInputParams.Pattern)
@@ -54,10 +56,10 @@ int IspBLC(TBLCParam tInputParams, unsigned short *pBuf)
     {
         for (int col = 0; col < Width / 2; col++)
         {
-            pBuf[row * 2 * Width + col * 2] = CLIP_12bit(pBuf[row * 2 * Width + col * 2] - BlockBlc[0][0]);
-            pBuf[row * 2 * Width + col * 2 + 1] = CLIP_12bit(pBuf[row * 2 * Width + col * 2 + 1] - BlockBlc[0][1]);
-            pBuf[(row * 2 + 1) * Width + col * 2] = CLIP_12bit(pBuf[(row * 2 + 1) * Width + col * 2] - BlockBlc[1][0]);
-            pBuf[(row * 2 + 1) * Width + col * 2 + 1] = CLIP_12bit(pBuf[(row * 2 + 1) * Width + col * 2 + 1] - BlockBlc[1][1]);
+            pBuf[row * 2 * Width + col * 2] = CLIP(unsigned short(pBuf[row * 2 * Width + col * 2] - BlockBlc[0][0]), 0, Domain);
+            pBuf[row * 2 * Width + col * 2 + 1] = CLIP(unsigned short(pBuf[row * 2 * Width + col * 2 + 1] - BlockBlc[0][1]), 0, Domain);
+            pBuf[(row * 2 + 1) * Width + col * 2] = CLIP(unsigned short(pBuf[(row * 2 + 1) * Width + col * 2] - BlockBlc[1][0]), 0, Domain);
+            pBuf[(row * 2 + 1) * Width + col * 2 + 1] = CLIP(unsigned short(pBuf[(row * 2 + 1) * Width + col * 2 + 1] - BlockBlc[1][1]), 0, Domain);
         }
     }
 
