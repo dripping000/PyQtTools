@@ -3,6 +3,7 @@ import sys
 import shutil
 import numpy as np
 import ctypes
+import matplotlib.pyplot as plt
 
 import cv2
 
@@ -48,20 +49,10 @@ def test_python_call_c():
     print(ret)
 
 
-def test_gamma():
-    '''
-    with open("./Resource/Gamma/gamma_sigmastar.txt", "r") as f:
-        for i, line in enumerate(f.readlines()):
-            if i != 0:
-                line = line.strip('\n')
-                print(line)
-
-    with open("./Resource/Gamma/gamma_hisi.txt", "r") as f:
-        for i, line in enumerate(f.readlines()):
-            line = line.split(',')
-            print(line)
-    '''
-
+'''
+gamma
+'''
+def test_gamma_hisi2sigmastar():
     input_x = 1024
     input_y = 4096
 
@@ -91,3 +82,63 @@ def test_gamma():
 
         for i in range(256):
             f.write(str(output_value_list[i])+"\n")
+
+
+def test_hisi_gamma_degamma():
+    hisi_gamma_x = 1024-1
+    hisi_gamma_y = 4096-1
+
+    hisi_degamma_x = 256-1
+    hisi_degamma_y = 1.0
+
+    gamma_hisi_x1023_y4095 = []
+    degamma_x255_y1 = []
+
+    with open("./Resource/Gamma/gamma_hisi_int.txt", "r") as f:
+        for i, line in enumerate(f.readlines()):
+            line = line.split(',')
+
+            gamma_hisi_x1023_y4095 = [float(x) for x in line]
+            # for j, value in enumerate(line):
+            #     print(j, value)
+
+            # x = np.arange(0, 1024+1, 1)  # np.arange(start, end+step, step)  [start, end] end/step+1
+            # plt.plot(x, gamma_hisi_x1023_y4095)
+            # plt.show()
+
+        for i in range(hisi_degamma_x+1):  # for i in range(0, hisi_degamma_x+1, 1):
+
+            for j, value in enumerate(gamma_hisi_x1023_y4095):
+                if (value / hisi_gamma_y * hisi_degamma_x) >= i:
+                    degamma_x255_y1.append(j/hisi_gamma_x)
+                    break
+
+        # x = np.arange(0, hisi_degamma_x+1, 1)
+        # plt.plot(x, degamma_x255_y1)
+        # plt.show()
+
+
+def test_gamma():
+    '''
+    with open("./Resource/Gamma/gamma_sigmastar.txt", "r") as f:
+        for i, line in enumerate(f.readlines()):
+            if i != 0:
+                line = line.strip('\n')
+                print(line)
+
+    # hisi
+    with open("./Resource/Gamma/gamma_hisi_float.txt", "r") as f:
+        for i, line in enumerate(f.readlines()):
+            line = line.split(',')
+
+            for j, value in enumerate(line):
+                print(j, value)
+
+            line = [float(x) for x in line]
+
+            x = np.arange(0, 1+1/1024, 1/1024)
+            plt.plot(x, line)
+            plt.show()
+    '''
+
+    test_hisi_gamma_degamma()
