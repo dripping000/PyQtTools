@@ -92,9 +92,9 @@ int OpenCVShow_unsigned_short(unsigned short *data, int width, int height, int f
         unsigned short* wPixel_data = data + row * width;
         for (int col = 0; col < width; col++)
         {
-            wPixel_Mat[0] = 0;
-            wPixel_Mat[1] = 0;
-            wPixel_Mat[2] = wPixel_data[0];  // R通道显示实际亮度值
+            wPixel_Mat[0] = wPixel_data[0] * 1;
+            wPixel_Mat[1] = wPixel_data[0] * 1;
+            wPixel_Mat[2] = wPixel_data[0] * 1;  // R通道显示实际亮度值
 
             wPixel_Mat += 3;
             wPixel_data += 1;
@@ -163,6 +163,58 @@ int OpenCVShow_unsigned_short_equal_unsigned_char(unsigned short *data, int widt
 
             byPixel_Mat += 1;
             wPixel_data += 1;
+        }
+    }
+
+    double t2 = cv::getTickCount();
+    double t = ((t2 - t1) / cv::getTickFrequency()) * 1000;
+    std::cout << "Execute time : " << t << " ms " << std::endl;
+
+    return 0;
+}
+
+
+int OpenCVShow_unsigned_short_RGB(unsigned short *data, int width, int height, int flag)
+{
+    if (flag == 0)
+    {
+        return -1;
+    }
+
+    double t1 = cv::getTickCount();
+
+    cv::Mat DebugMK_test = cv::Mat::zeros(height, width, CV_16UC3);
+
+    for (int row = 0; row < height; row++)
+    {
+        unsigned short* wPixel_Mat = (unsigned short*)(DebugMK_test.data + row * DebugMK_test.step);
+        unsigned short* wPixel_data = data + row * width * 3;
+        for (int col = 0; col < width; col++)
+        {
+            wPixel_Mat[2] = wPixel_data[0] * 1;
+            wPixel_Mat[1] = wPixel_data[1] * 1;
+            wPixel_Mat[0] = wPixel_data[2] * 1;
+
+            wPixel_Mat += 3;
+            wPixel_data += 3;
+        }
+    }
+
+
+    cv::Mat DebugMK_test_show = cv::Mat::zeros(height, width, CV_8UC3);
+
+    for (int row = 0; row < height; row++)
+    {
+        unsigned char* byPixel_Mat = (unsigned char*)(DebugMK_test_show.data + row * DebugMK_test_show.step);
+        unsigned short* wPixel_data = data + row * width * 3;
+        for (int col = 0; col < width; col++)
+        {
+            byPixel_Mat[2] = wPixel_data[0] / double(255.0) * 255;
+            byPixel_Mat[1] = wPixel_data[1] / double(255.0) * 255;
+            byPixel_Mat[0] = wPixel_data[2] / double(255.0) * 255;
+
+            byPixel_Mat += 3;
+            wPixel_data += 3;
         }
     }
 

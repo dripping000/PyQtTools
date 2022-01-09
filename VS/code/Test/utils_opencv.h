@@ -9,6 +9,8 @@ int OpenCVShow_unsigned_short(unsigned short *data, int width, int height, int f
 int OpenCVShow_unsigned_short2unsigned_char(unsigned short *data, int width, int height, int flag);
 int OpenCVShow_unsigned_short_equal_unsigned_char(unsigned short *data, int width, int height, int flag);
 
+int OpenCVShow_unsigned_short_RGB(unsigned short *data, int width, int height, int flag);
+
 int OpenCVShow_double(double *data, int width, int height, int flag);
 
 
