@@ -8,6 +8,18 @@ import tools.rawimageeditor.isp_utils.isp_dpc as isp_dpc
 
 from common import *
 
+# [DebugMK]
+from tools.rawimageeditor.isp_utils import plained_raw
+import cv2
+
+
+def DebugMK(file_name, image_name, data):
+    plained_raw.write_plained_file(file_name, data)  # [DebugMK]
+
+    # data_show = data.copy()
+    # data_show = data_show[..., [2,1,0]]
+    # cv2.imwrite(image_name, data_show.astype(np.uint8))  # [DebugMK]
+
 
 def get_src_raw_data(raw: ImageInfo, params: RawImageEditorParams):
     filename = params.rawformat.filename
@@ -79,6 +91,9 @@ def IspBLC(raw: ImageInfo, params: RawImageEditorParams):
     DEBUGMK(sys._getframe().f_code.co_name, __file__, str(sys._getframe().f_lineno), "interface_BLC_ret={}".format(ret))
 
     ret_img = ImageInfo()
+    ret_img.set_color_space("raw")
+    ret_img.set_raw_pattern(params.rawformat.pattern)
+    ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data
     return ret_img
 
@@ -93,6 +108,9 @@ def IspGain(raw: ImageInfo, params: RawImageEditorParams):
     data = np.clip(data, 0, raw.max_data)
 
     ret_img = ImageInfo()
+    ret_img.set_color_space("raw")
+    ret_img.set_raw_pattern(params.rawformat.pattern)
+    ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data
     return ret_img
 
@@ -107,6 +125,9 @@ def IspDPC(raw: ImageInfo, params: RawImageEditorParams):
     data = isp_dpc.DPC(data, dpc_threshold_ratio, dpc_method)
 
     ret_img = ImageInfo()
+    ret_img.set_color_space("raw")
+    ret_img.set_raw_pattern(params.rawformat.pattern)
+    ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data
     return ret_img
 
@@ -153,6 +174,7 @@ def demosaic(raw: ImageInfo, params: RawImageEditorParams):
 
     ret_img = ImageInfo()
     ret_img.set_color_space("RGB")
+    ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data_out
     return ret_img
 
