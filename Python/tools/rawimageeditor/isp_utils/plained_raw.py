@@ -6,10 +6,13 @@ import tools.rawimageeditor.isp_utils.raw_image_show as raw_image_show
 
 def read_plained_file(file_path_name, height, width, shift_bits):
     frame = np.fromfile(file_path_name, dtype="uint16")
+    # print('%#x' % frame[0])
 
     frame = frame[0:height*width]
     frame.shape = [height, width]
     frame = np.right_shift(frame, shift_bits)
+
+    # print("shape", frame.shape)
 
     return frame
 

@@ -10,8 +10,9 @@ mono, the image data value is between 0~1
 def raw_image_show_fullsize(image, height, width):
     x = width/100
     y = height/100
+
     plt.figure(num='test', figsize=(x,y))
-    plt.imshow(image, cmap='gray', interpolation='bicubic', vmax=1.0,vmin=0.0)
+    plt.imshow(image, cmap='gray', interpolation='bicubic', vmax=1.0, vmin=0.0)
     plt.xticks([]), plt.yticks([])  # 隐藏X轴和Y轴的标记位置和labels
     plt.show()
     print('show')
@@ -59,9 +60,10 @@ def raw_image_show_fakecolor(image, height, width, pattern):
         R[1::2, 1::2] = image[1::2, 1::2]
     else:
         print("show failed")
+        return
 
     plt.figure(num='test', figsize=(x,y))
-    plt.imshow(rgb_img, interpolation='bicubic', vmax=1.0)
+    plt.imshow(rgb_img, interpolation='bicubic', vmax=1.0, vmin=0)
     plt.xticks([]), plt.yticks([])  # 隐藏X轴和Y轴的标记位置和labels
     plt.show()
     print('show')
