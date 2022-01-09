@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import tools.rawimageeditor.isp_utils.raw_image_show as raw_image_show
+from tools.rawimageeditor.isp_utils import raw_image_show
 
 
 # 不带颜色通道的分离
