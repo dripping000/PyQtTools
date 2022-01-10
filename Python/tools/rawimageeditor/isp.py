@@ -4,7 +4,8 @@ from tools.rawimageeditor.RawImageEditorParams import RawImageEditorParams
 import numpy as np
 import ctypes
 
-import tools.rawimageeditor.isp_utils.isp_dpc as isp_dpc
+from tools.rawimageeditor.isp_utils import isp_dpc
+from tools.rawimageeditor.isp_utils import isp_demosaic
 
 from common import *
 
@@ -31,6 +32,7 @@ def get_src_raw_data(raw: ImageInfo, params: RawImageEditorParams):
     if (filename != "" and width != 0 and height != 0 and bit_depth != 0):
         ret_img.set_color_space("raw")
         ret_img.set_raw_pattern(params.rawformat.pattern)
+        ret_img.set_bit_depth_src(params.rawformat.bit_depth)
         ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
         ret_img.load_data(filename, width, height, bit_depth)
         return ret_img
@@ -93,6 +95,7 @@ def IspBLC(raw: ImageInfo, params: RawImageEditorParams):
     ret_img = ImageInfo()
     ret_img.set_color_space("raw")
     ret_img.set_raw_pattern(params.rawformat.pattern)
+    ret_img.set_bit_depth_src(params.rawformat.bit_depth)
     ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data
     return ret_img
@@ -110,6 +113,7 @@ def IspGain(raw: ImageInfo, params: RawImageEditorParams):
     ret_img = ImageInfo()
     ret_img.set_color_space("raw")
     ret_img.set_raw_pattern(params.rawformat.pattern)
+    ret_img.set_bit_depth_src(params.rawformat.bit_depth)
     ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data
     return ret_img
@@ -127,6 +131,7 @@ def IspDPC(raw: ImageInfo, params: RawImageEditorParams):
     ret_img = ImageInfo()
     ret_img.set_color_space("raw")
     ret_img.set_raw_pattern(params.rawformat.pattern)
+    ret_img.set_bit_depth_src(params.rawformat.bit_depth)
     ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data
     return ret_img
@@ -176,6 +181,28 @@ def demosaic(raw: ImageInfo, params: RawImageEditorParams):
     ret_img.set_color_space("RGB")
     ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data_out
+    return ret_img
+
+
+def demosaic_Python(raw: ImageInfo, params: RawImageEditorParams):
+    demosaic_method = params.demosaic_params.demosaic_method
+
+    pattern = raw.get_raw_pattern().upper()
+    maxvalue = raw.get_max_data()
+
+    width = raw.get_width()
+    height = raw.get_height()
+    data_in = raw.get_data().copy()
+
+    if demosaic_method == 'blinnear':
+        data_in = isp_demosaic.blinnear(data_in, pattern)
+    elif demosaic_method == 'AHD':
+        data_in = isp_demosaic.AHD(data_in, pattern, delta=2, gamma=1, maxvalue=maxvalue)
+
+    ret_img = ImageInfo()
+    ret_img.set_color_space("RGB")
+    ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
+    ret_img.data = data_in
     return ret_img
 
 

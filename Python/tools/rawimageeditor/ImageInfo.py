@@ -152,6 +152,10 @@ class ImageInfo():
         return self.bit_depth_dst
 
 
+    def get_max_data(self):
+        return self.max_data
+
+
     def set_filename(self, name):
         self.filename = name
 

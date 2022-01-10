@@ -6,6 +6,6 @@ pipeline_dict = {
     "blc"                               :                     isp.IspBLC,
     "digital gain"                      :                     isp.IspGain,
     "bad pixel correction"              :                     isp.IspDPC,
-    "demosaic"                          :                     isp.demosaic,
+    "demosaic"                          :                     isp.demosaic_Python,
     "awb"                               :                     isp.IspAWB,
 }

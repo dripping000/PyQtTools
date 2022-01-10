@@ -545,7 +545,7 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
+              <y>-143</y>
               <width>370</width>
               <height>785</height>
              </rect>
@@ -1268,20 +1268,15 @@
                </property>
                <layout class="QGridLayout" name="gridLayout_10">
                 <item row="0" column="0">
-                 <widget class="QComboBox" name="demosaic_type">
+                 <widget class="QComboBox" name="demosaic_method">
                   <item>
                    <property name="text">
-                    <string>双线性插值</string>
+                    <string>blinnear</string>
                    </property>
                   </item>
                   <item>
                    <property name="text">
-                    <string>Malvar2004</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Menon2007</string>
+                    <string>AHD</string>
                    </property>
                   </item>
                  </widget>
@@ -1595,7 +1590,7 @@
   <tabstop>digital_gain</tabstop>
   <tabstop>dpc_threshold_ratio</tabstop>
   <tabstop>inputflatphoto</tabstop>
-  <tabstop>demosaic_type</tabstop>
+  <tabstop>demosaic_method</tabstop>
   <tabstop>awb_r</tabstop>
   <tabstop>awb_g</tabstop>
   <tabstop>awb_b</tabstop>

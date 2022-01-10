@@ -157,6 +157,29 @@ class DPCParams():
             self.need_flush = True
 
 
+class DemosaicParams():
+    def __init__(self):
+        self.demosaic_method = 'blinnear'
+
+        self.name = 'demosaic'
+        self.need_flush = False
+
+
+    def set(self, ui:Ui_ImageEditor):
+        ui.demosaic_method.setCurrentText(self.demosaic_method)
+
+
+    def get(self, ui:Ui_ImageEditor):
+        self.set_demosaic_method(ui.demosaic_method.currentText())
+        return self.need_flush
+
+
+    def set_demosaic_method(self, demosaic_method):
+        if(demosaic_method != self.demosaic_method):
+            self.demosaic_method = demosaic_method
+            self.need_flush = True
+
+
 class AWBParams():
     def __init__(self):
         self.awb_gain = [1.0, 1.0, 1.0]
@@ -193,6 +216,7 @@ class RawImageEditorParams():
             DigitalGainParams(),
             DPCParams(),
             AWBParams(),
+            DemosaicParams(),
         ]
 
         [
@@ -201,6 +225,7 @@ class RawImageEditorParams():
             self.digital_gain_params,
             self.dpc_params,
             self.awb,
+            self.demosaic_params,
         ] = self.ui_params
 
 
