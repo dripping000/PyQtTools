@@ -148,7 +148,15 @@ class ISPPipeline():
             self.ISPPipeline_params.need_flush = False
 
             if(len(self.ISPPipeline_params.need_flush_isp) > 0):
-                index_need_flush = self.get_pipeline_node_index(self.ISPPipeline_params.need_flush_isp[0])  # DebugMK self.ISPPipeline_params.need_flush_isp[0]不一定是pipeline最靠前的模块
+                # index_need_flush = self.get_pipeline_node_index(self.ISPPipeline_params.need_flush_isp[0])  # self.ISPPipeline_params.need_flush_isp[0]不一定是pipeline最靠前的模块
+                index_need_flush_min = 255
+                for need_flush_isp in self.ISPPipeline_params.need_flush_isp:
+                    index_need_flush_ = self.get_pipeline_node_index(need_flush_isp)
+
+                    if index_need_flush_ != -1:
+                        if index_need_flush_min > index_need_flush_:
+                            index_need_flush_min = index_need_flush_
+                            index_need_flush = index_need_flush_min
 
         if index_compare_pipeline == -1:                                    # pipeline未发生变化
             if index_need_flush == -1:                                      # pipeline未发生变化，界面参数未发生变化

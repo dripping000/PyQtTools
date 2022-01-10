@@ -127,7 +127,7 @@ class RawImageEditor(SubWindow):
 
     def update_time_bar(self, value):
         """
-        func：ISP 处理时间回调
+        func: ISP 处理时间回调
         """
         self.qLable_time.setText(value)
 
