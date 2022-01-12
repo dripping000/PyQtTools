@@ -142,3 +142,61 @@ def test_gamma():
     '''
 
     test_hisi_gamma_degamma()
+
+
+'''
+get_file_list
+'''
+def get_file_list(file_path):
+    dir_list = os.listdir(file_path)
+    if not dir_list:
+        return
+    else:
+        # 注意，这里使用lambda表达式，将文件按照最后修改时间顺序升序排列
+        # os.path.getmtime() 函数是获取文件最后修改时间
+        # os.path.getctime() 函数是获取文件最后创建时间
+        # dir_list = sorted(dir_list, key=lambda x: os.path.getmtime(os.path.join(file_path, x)), reverse=False)
+        dir_list = sorted(dir_list, key=lambda x: int(x[:-4]), reverse=False)  # [DebugMK]
+        # print(dir_list)
+        return dir_list
+
+
+def test_get_file_list():
+    dir_path = "C:/Users/mengkun/Desktop/抓取的图/"
+    dir_list = get_file_list(dir_path)
+
+
+'''
+YUV2Video
+'''
+def NV212RGB(yuv_path, width, height):
+    with open(yuv_path, 'rb') as f:
+        yuvdata = np.fromfile(f, dtype=np.uint8)
+    # yuvdata = yuvdata[4 * 4 :]
+
+    cv_format = cv2.COLOR_YUV2BGR_NV12
+    bgr_img = cv2.cvtColor(yuvdata.reshape((height*3//2, width)), cv_format)
+
+    return bgr_img
+
+
+def test_YUV2Video():
+    dir_path = "C:/Users/mengkun/Desktop/抓取的图/"
+    dir_list = get_file_list(dir_path)
+
+    width = 4096
+    height = 2176
+
+    fps = 25
+    video = cv2.VideoWriter(dir_path+'isp_yuv.mp4', cv2.VideoWriter_fourcc('m', 'p', '4', 'v'), fps, (width,height))  # [DebugMK]
+
+    for file_name in dir_list:
+        file_path = dir_path + file_name
+        print(file_path)
+
+        image = NV212RGB(file_path, width, height)
+
+        image_save_path = file_path.replace(".yuv",".bmp")
+        cv2.imencode('.bmp', image[:,:4096,:])[1].tofile(image_save_path)
+
+        video.write(image)

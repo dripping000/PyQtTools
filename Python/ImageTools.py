@@ -60,10 +60,12 @@ class ImageTools(MainWindow):
 
     def test(self):  # [DebugMK]
         print("test_begin")
-        test_copy_dll()
+        # test_copy_dll()
         # test_python_call_c()
 
         # test_gamma()
+
+        test_get_file_list()
         print("test_end")
 
 
