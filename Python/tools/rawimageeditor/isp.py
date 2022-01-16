@@ -199,6 +199,8 @@ def demosaic_Python(raw: ImageInfo, params: RawImageEditorParams):
     elif demosaic_method == 'AHD':
         data_in = isp_demosaic.AHD(data_in, pattern, delta=2, gamma=1, maxvalue=maxvalue)
 
+    data_in = data_in[..., ::-1]  # RGB--->BGR
+
     ret_img = ImageInfo()
     ret_img.set_color_space("RGB")
     ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
