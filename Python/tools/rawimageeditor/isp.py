@@ -252,7 +252,24 @@ def IspAWB(raw: ImageInfo, params: RawImageEditorParams):
 
     ret_img = ImageInfo()
     ret_img.set_color_space("RGB")
+    ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data_out
+    return ret_img
+
+
+""" gamma """
+def IspGamma_Python(raw: ImageInfo, params: RawImageEditorParams):
+    gamma_ratio = params.gamma_params.gamma_ratio
+
+    data = raw.get_data().copy()
+
+    data = ((data/raw.max_data) ** (1.0/gamma_ratio)) * raw.max_data
+    data = np.clip(data, 0, raw.max_data)
+
+    ret_img = ImageInfo()
+    ret_img.set_color_space("RGB")
+    ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
+    ret_img.data = data
     return ret_img
 
 

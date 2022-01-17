@@ -205,6 +205,29 @@ class AWBParams():
             self.need_flush = True
 
 
+class GammaParams():
+    def __init__(self):
+        self.gamma_ratio = 2.2
+
+        self.name = 'gamma'
+        self.need_flush = False
+
+
+    def set(self, ui:Ui_ImageEditor):
+        ui.gamma_ratio.setValue(self.gamma_ratio)
+
+
+    def get(self, ui:Ui_ImageEditor):
+        self.set_gamma_ratio(ui.gamma_ratio.value())
+        return self.need_flush
+
+
+    def set_gamma_ratio(self, gamma_ratio):
+        if(gamma_ratio != self.gamma_ratio):
+            self.gamma_ratio = gamma_ratio
+            self.need_flush = True
+
+
 class RawImageEditorParams():
     def __init__(self):
         self.need_flush = False
@@ -217,6 +240,7 @@ class RawImageEditorParams():
             DPCParams(),
             AWBParams(),
             DemosaicParams(),
+            GammaParams(),
         ]
 
         [
@@ -226,6 +250,7 @@ class RawImageEditorParams():
             self.dpc_params,
             self.awb,
             self.demosaic_params,
+            self.gamma_params
         ] = self.ui_params
 
 
