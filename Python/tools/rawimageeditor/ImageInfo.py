@@ -275,3 +275,15 @@ class ImageInfo():
 
         data = np.uint8(ratio * data)
         return data
+
+
+    def get_raw_awb_gain(self, rect):
+        awb_gain = dict()
+        if (self.color_space == "raw"):
+            awb_gain[self.get_data_point_raw_pattern(rect[1], rect[0])] = np.mean(self.data[rect[1]:rect[3]:2, rect[0]:rect[2]:2])
+            awb_gain[self.get_data_point_raw_pattern(rect[1], rect[0]+1)] = np.mean(self.data[rect[1]:rect[3]:2, (rect[0]+1):rect[2]:2])
+            awb_gain[self.get_data_point_raw_pattern(rect[1]+1, rect[0])] = np.mean(self.data[(rect[1]+1):rect[3]:2, rect[0]:rect[2]:2])
+            awb_gain[self.get_data_point_raw_pattern(rect[1]+1, rect[0]+1)] = np.mean(self.data[(rect[1]+1):rect[3]:2, (rect[0]+1):rect[2]:2])
+            return [awb_gain['g'] / awb_gain['r'], awb_gain['g'] / awb_gain['g'], awb_gain['g'] / awb_gain['b']]
+        else:
+            return None

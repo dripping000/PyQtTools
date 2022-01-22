@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QGraphicsScene, QFileDialog
+from PyQt5.QtWidgets import QGraphicsScene, QFileDialog, QGraphicsView
 
 from tools.rawimageeditor.ui.rawimageeditor_window import Ui_ImageEditor
 from tools.rawimageeditor.RawImageEditorParams import RawImageEditorParams
@@ -36,13 +36,19 @@ class RawImageEditor(SubWindow):
         self.__point_value = None
         self.__scale_ratio = 100
 
+        self.__select_from_raw_rect = []
+        self.__awb_select_white_area_flag = False
+
         # 界面控制
         self.ui.open_image.clicked.connect(self.open_image)
         self.ui.pipeline_ok.clicked.connect(self.update_pipeline)
+        self.ui.select_from_raw.clicked.connect(self.select_from_raw)
         # 信号与槽
         self.imageview.signalDragEvent.connect(self.update_filename)
         self.imageview.signalmouseMoveEvent.connect(self.display_point_value)
         self.imageview.signalWheelEvent.connect(self.display_scale_ratio)
+
+        self.imageview.rubberBandChanged.connect(self.update_select_from_raw)
 
         self.c_IspPipeline.c_ISPProc.doneCB.connect(self.update_display_image)
         self.c_IspPipeline.c_ISPProc.processRateCB.connect(self.update_process_bar)
@@ -165,3 +171,28 @@ class RawImageEditor(SubWindow):
         if(self.c_ImageInfo.get_data() is not None):
             self.__scale_ratio = int(scale_ratio * 100)
             self.display_image_info()
+
+
+    def select_from_raw(self):
+        self.imageview.setDragMode(QGraphicsView.RubberBandDrag)
+        self.__awb_select_white_area_flag = True
+
+
+    def update_select_from_raw(self, viewportRect, fromScenePoint, toScenePoint):
+        # print(fromScenePoint.x(), " ", fromScenePoint.y(), " ", toScenePoint.x(), " ", toScenePoint.y())
+
+        if((toScenePoint.x() == 0) and (toScenePoint.y() == 0)
+            and (self.__select_from_raw_rect[2] > self.__select_from_raw_rect[0]) and (self.__select_from_raw_rect[3] > self.__select_from_raw_rect[1])):
+            if (self.__awb_select_white_area_flag == True):
+                self.imageview.setDragMode(QGraphicsView.ScrollHandDrag)
+                self.__awb_select_white_area_flag = False
+
+                print(self.__select_from_raw_rect[0], " ", self.__select_from_raw_rect[1], " ", self.__select_from_raw_rect[2], " ", self.__select_from_raw_rect[3])
+
+                awb_gain = self.c_ImageInfo.get_raw_awb_gain(self.__select_from_raw_rect)
+                if(awb_gain is not None):
+                    self.RawImageEditor_params.awb.set_awb_gain(awb_gain)
+                    self.RawImageEditor_params.awb.set(self.ui)  # DebugMK
+        else:
+            self.__select_from_raw_rect = [int(fromScenePoint.x()), int(fromScenePoint.y()),
+                                            int(toScenePoint.x()), int(toScenePoint.y())]
