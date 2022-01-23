@@ -8,5 +8,6 @@ pipeline_dict = {
     "bad pixel correction"              :                     isp.IspDPC,
     "demosaic"                          :                     isp.demosaic_Python,
     "awb"                               :                     isp.IspAWB,
+    "ccm"                               :                     isp.IspCCM_Python,
     "gamma"                             :                     isp.IspGamma_Python,
 }

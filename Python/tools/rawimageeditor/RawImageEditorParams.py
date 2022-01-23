@@ -205,6 +205,41 @@ class AWBParams():
             self.need_flush = True
 
 
+class CCMParams():
+    def __init__(self):
+        self.ccm_matrix = [[1.0, 0.0, 0.0],
+                           [0.0, 1.0, 0.0],
+                           [0.0, 0.0, 1.0]]
+
+        self.name = 'CCM'
+        self.need_flush = False
+
+
+    def set(self, ui:Ui_ImageEditor):
+        ui.ccm_rr.setValue(self.ccm_matrix[0][0])
+        ui.ccm_rg.setValue(self.ccm_matrix[0][1])
+        ui.ccm_rb.setValue(self.ccm_matrix[0][2])
+        ui.ccm_gr.setValue(self.ccm_matrix[1][0])
+        ui.ccm_gg.setValue(self.ccm_matrix[1][1])
+        ui.ccm_gb.setValue(self.ccm_matrix[1][2])
+        ui.ccm_br.setValue(self.ccm_matrix[2][0])
+        ui.ccm_bg.setValue(self.ccm_matrix[2][1])
+        ui.ccm_bb.setValue(self.ccm_matrix[2][2])
+
+
+    def get(self, ui:Ui_ImageEditor):
+        self.set_ccm_matrix([[ui.ccm_rr.value(), ui.ccm_rg.value(), ui.ccm_rb.value()],
+                             [ui.ccm_gr.value(), ui.ccm_gg.value(), ui.ccm_gb.value()],
+                             [ui.ccm_br.value(), ui.ccm_bg.value(), ui.ccm_bb.value()]])
+        return self.need_flush
+
+
+    def set_ccm_matrix(self, ccm_matrix):
+        if(ccm_matrix != self.ccm_matrix):
+            self.ccm_matrix = ccm_matrix
+            self.need_flush = True
+
+
 class GammaParams():
     def __init__(self):
         self.gamma_ratio = 2.2
@@ -240,6 +275,7 @@ class RawImageEditorParams():
             DPCParams(),
             AWBParams(),
             DemosaicParams(),
+            CCMParams(),
             GammaParams(),
         ]
 
@@ -250,6 +286,7 @@ class RawImageEditorParams():
             self.dpc_params,
             self.awb,
             self.demosaic_params,
+            self.ccm_params,
             self.gamma_params
         ] = self.ui_params
 

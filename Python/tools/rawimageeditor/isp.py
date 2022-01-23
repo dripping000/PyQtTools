@@ -257,6 +257,31 @@ def IspAWB(raw: ImageInfo, params: RawImageEditorParams):
     return ret_img
 
 
+""" CCM """
+def IspCCM_Python(raw: ImageInfo, params: RawImageEditorParams):
+    ccm_matrix = params.ccm_params.ccm_matrix
+
+    width = raw.get_width()
+    height = raw.get_height()
+
+    data = raw.get_data().copy()
+
+    shape = (height, width, 3)
+    data_out = np.zeros(shape, dtype=np.uint16)
+
+    data = data[..., ::-1]  # BGR--->RGB
+    data_out[:, :, 0] = data[:, :, 0] * ccm_matrix[0][0] + data[:, :, 1] * ccm_matrix[0][1] + data[:, :, 2] * ccm_matrix[0][2]
+    data_out[:, :, 1] = data[:, :, 0] * ccm_matrix[1][0] + data[:, :, 1] * ccm_matrix[1][1] + data[:, :, 2] * ccm_matrix[1][2]
+    data_out[:, :, 2] = data[:, :, 0] * ccm_matrix[2][0] + data[:, :, 1] * ccm_matrix[2][1] + data[:, :, 2] * ccm_matrix[2][2]
+    data_out = data_out[..., ::-1]  # RGB--->BGR
+
+    ret_img = ImageInfo()
+    ret_img.set_color_space("RGB")
+    ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
+    ret_img.data = data_out
+    return ret_img
+
+
 """ gamma """
 def IspGamma_Python(raw: ImageInfo, params: RawImageEditorParams):
     gamma_ratio = params.gamma_params.gamma_ratio
