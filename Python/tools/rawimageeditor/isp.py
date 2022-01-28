@@ -179,6 +179,7 @@ def demosaic(raw: ImageInfo, params: RawImageEditorParams):
 
     ret_img = ImageInfo()
     ret_img.set_color_space("RGB")
+    ret_img.set_bit_depth_src(params.rawformat.bit_depth)
     ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data_out
     return ret_img
@@ -203,6 +204,7 @@ def demosaic_Python(raw: ImageInfo, params: RawImageEditorParams):
 
     ret_img = ImageInfo()
     ret_img.set_color_space("RGB")
+    ret_img.set_bit_depth_src(params.rawformat.bit_depth)
     ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data_in
     return ret_img
@@ -252,6 +254,7 @@ def IspAWB(raw: ImageInfo, params: RawImageEditorParams):
 
     ret_img = ImageInfo()
     ret_img.set_color_space("RGB")
+    ret_img.set_bit_depth_src(params.rawformat.bit_depth)
     ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data_out
     return ret_img
@@ -277,6 +280,7 @@ def IspCCM_Python(raw: ImageInfo, params: RawImageEditorParams):
 
     ret_img = ImageInfo()
     ret_img.set_color_space("RGB")
+    ret_img.set_bit_depth_src(params.rawformat.bit_depth)
     ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data_out
     return ret_img
@@ -293,6 +297,7 @@ def IspGamma_Python(raw: ImageInfo, params: RawImageEditorParams):
 
     ret_img = ImageInfo()
     ret_img.set_color_space("RGB")
+    ret_img.set_bit_depth_src(params.rawformat.bit_depth)
     ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
     ret_img.data = data
     return ret_img
