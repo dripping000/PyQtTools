@@ -12,6 +12,8 @@ int IspAWB(TAWBParam tInputParams, unsigned short* pInputBuf, unsigned short* pO
     double RG = tInputParams.RGain;
     double BG = tInputParams.BGain;
 
+    unsigned short Domain = tInputParams.Domain;
+
     float sum_R = 0.0, sum_G = 0.0, sum_B = 0.0;
     float RG_cal = 0.0, BG_cal = 0.0;
     for (int i = 0; i < Height; i = i + 1)
@@ -38,9 +40,9 @@ int IspAWB(TAWBParam tInputParams, unsigned short* pInputBuf, unsigned short* pO
     {
         for (int j = 0; j < Width; j = j + 1)
         {
-            pOutputBuf[i * Width + j] = CLIP_12bit(round(pInputBuf[i * Width + j] / RG * blc_com));
-            pOutputBuf[i * Width + j + ImgSize * 1] = CLIP_12bit(round(pInputBuf[i * Width + j + ImgSize * 1] * blc_com));
-            pOutputBuf[i * Width + j + ImgSize * 2] = CLIP_12bit(round(pInputBuf[i * Width + j + ImgSize * 2] / BG * blc_com));
+            pOutputBuf[i * Width + j] = CLIP(unsigned short(round(pInputBuf[i * Width + j] / RG * blc_com)), 0, Domain);
+            pOutputBuf[i * Width + j + ImgSize * 1] = CLIP(unsigned short(round(pInputBuf[i * Width + j + ImgSize * 1] * blc_com)), 0, Domain);
+            pOutputBuf[i * Width + j + ImgSize * 2] = CLIP(unsigned short(round(pInputBuf[i * Width + j + ImgSize * 2] / BG * blc_com)), 0, Domain);
         }
     }
 
