@@ -40,9 +40,9 @@ int IspAWB(TAWBParam tInputParams, unsigned short* pInputBuf, unsigned short* pO
     {
         for (int j = 0; j < Width; j = j + 1)
         {
-            pOutputBuf[i * Width + j] = CLIP(unsigned short(round(pInputBuf[i * Width + j] / RG * blc_com)), 0, Domain);
-            pOutputBuf[i * Width + j + ImgSize * 1] = CLIP(unsigned short(round(pInputBuf[i * Width + j + ImgSize * 1] * blc_com)), 0, Domain);
-            pOutputBuf[i * Width + j + ImgSize * 2] = CLIP(unsigned short(round(pInputBuf[i * Width + j + ImgSize * 2] / BG * blc_com)), 0, Domain);
+            pOutputBuf[i * Width + j] = CLIP(round(pInputBuf[i * Width + j] / RG * blc_com), 0, Domain);
+            pOutputBuf[i * Width + j + ImgSize * 1] = CLIP(round(pInputBuf[i * Width + j + ImgSize * 1] * blc_com), 0, Domain);
+            pOutputBuf[i * Width + j + ImgSize * 2] = CLIP(round(pInputBuf[i * Width + j + ImgSize * 2] / BG * blc_com), 0, Domain);
         }
     }
 
