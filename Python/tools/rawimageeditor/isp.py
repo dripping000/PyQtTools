@@ -303,6 +303,48 @@ def IspGamma_Python(raw: ImageInfo, params: RawImageEditorParams):
     return ret_img
 
 
+""" LTM """
+def IspLTM_Python(raw: ImageInfo, params: RawImageEditorParams):
+    dark_boost = params.ltm_params.dark_boost / 100
+    bright_suppress = params.ltm_params.bright_suppress / 100
+
+    maxvalue = raw.max_data
+
+    data = raw.get_data().copy()
+    data = data[..., ::-1]  # BGR--->RGB
+
+    if (raw.get_color_space() == "RGB"):
+        gray_image = 0.299 * data[:, :, 0] + 0.587 * data[:, :, 1] + 0.114 * data[:, :, 2]
+
+        # 双边滤波的保边特性，这样可以减少处理后的halo瑕疵
+        mask = cv2.GaussianBlur(gray_image, (5,5), 1.5)
+
+        # 归一化
+        mask = mask / maxvalue
+
+        # 亮区和暗区用不同的LUT曲线
+        mask = np.where(mask < 0.5, 1 - dark_boost * (mask - 0.5) * (mask - 0.5), 1 + bright_suppress * (mask - 0.5) * (mask - 0.5))
+        alpha = np.empty(data.shape, dtype=np.float32)
+        alpha[:, :, 0] = mask
+        alpha[:, :, 1] = mask
+        alpha[:, :, 2] = mask
+
+        # 在原来的基础上叠加一个乘方，相当于对每个区域的gamma值进行修改
+        data = maxvalue * np.power(data/maxvalue, alpha)
+        data = np.clip(data, 0, maxvalue)
+        data = data[..., ::-1]  # RGB--->BGR
+
+        ret_img = ImageInfo()
+        ret_img.set_color_space("RGB")
+        ret_img.set_bit_depth_src(params.rawformat.bit_depth)
+        ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
+        ret_img.data = data
+        return ret_img
+    else:
+        DEBUGMK(sys._getframe().f_code.co_name, __file__, str(sys._getframe().f_lineno), "LTM need RGB data!")
+        return None
+
+
 """ private """
 def get_pattern_value(pattern):
     if pattern == "rggb":

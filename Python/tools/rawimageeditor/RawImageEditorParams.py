@@ -263,6 +263,38 @@ class GammaParams():
             self.need_flush = True
 
 
+class LTMParams():
+    def __init__(self):
+        self.dark_boost = 100
+        self.bright_suppress = 100
+
+        self.name = 'LTM'
+        self.need_flush = False
+
+
+    def set(self, ui:Ui_ImageEditor):
+        ui.dark_boost.setValue(self.dark_boost)
+        ui.bright_suppress.setValue(self.bright_suppress)
+
+
+    def get(self, ui:Ui_ImageEditor):
+        self.set_dark_boost(ui.dark_boost.value())
+        self.set_bright_suppress(ui.bright_suppress.value())
+        return self.need_flush
+
+
+    def set_dark_boost(self, dark_boost):
+        if(dark_boost != self.dark_boost):
+            self.dark_boost = dark_boost
+            self.need_flush = True
+
+
+    def set_bright_suppress(self, bright_suppress):
+        if(bright_suppress != self.bright_suppress):
+            self.bright_suppress = bright_suppress
+            self.need_flush = True
+
+
 class RawImageEditorParams():
     def __init__(self):
         self.need_flush = False
@@ -277,6 +309,7 @@ class RawImageEditorParams():
             DemosaicParams(),
             CCMParams(),
             GammaParams(),
+            LTMParams(),
         ]
 
         [
@@ -287,7 +320,8 @@ class RawImageEditorParams():
             self.awb,
             self.demosaic_params,
             self.ccm_params,
-            self.gamma_params
+            self.gamma_params,
+            self.ltm_params,
         ] = self.ui_params
 
 
