@@ -111,7 +111,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\..\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_world400.lib;opencv_world400d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_world400d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -161,7 +161,9 @@
     <ClInclude Include="isp_blc.h" />
     <ClInclude Include="isp_ccm.h" />
     <ClInclude Include="isp_interpolation.h" />
+    <ClInclude Include="isp_isp_gain.h" />
     <ClInclude Include="isp_raw.h" />
+    <ClInclude Include="isp_rgb_gamma.h" />
     <ClInclude Include="utils_opencv.h" />
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +173,8 @@
     <ClCompile Include="isp_blc.cpp" />
     <ClCompile Include="isp_ccm.cpp" />
     <ClCompile Include="isp_interpolation.cpp" />
+    <ClCompile Include="isp_isp_gain.cpp" />
+    <ClCompile Include="isp_rgb_gamma.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="utils_opencv.cpp" />
   </ItemGroup>

@@ -42,6 +42,12 @@
     <ClInclude Include="Demosaicing.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="isp_isp_gain.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="isp_rgb_gamma.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="isp_blc.cpp">
@@ -66,6 +72,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Demosaicing.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="isp_isp_gain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="isp_rgb_gamma.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
