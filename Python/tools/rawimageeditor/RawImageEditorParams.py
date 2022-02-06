@@ -295,6 +295,66 @@ class LTMParams():
             self.need_flush = True
 
 
+class CSCParams():
+    def __init__(self):
+        self.color_space = 'BT709'
+
+        self.brightness = 50
+        self.contrast = 50
+        self.hue = 50
+        self.saturation = 50
+
+        self.name = 'CSC'
+        self.need_flush = False
+
+
+    def set(self, ui:Ui_ImageEditor):
+        index = ui.color_space.findText(self.color_space)
+        ui.color_space.setCurrentIndex(index)
+
+        ui.luma.setValue(self.brightness)
+        ui.contrast.setValue(self.contrast)
+        ui.hue.setValue(self.hue)
+        ui.saturation.setValue(self.saturation)
+
+
+    def get(self, ui:Ui_ImageEditor):
+        self.set_color_space(ui.color_space.currentText())
+
+        self.set_brightness(ui.luma.value())
+        self.set_contrast(ui.contrast.value())
+        self.set_hue(ui.hue.value())
+        self.set_saturation(ui.saturation.value())
+        return self.need_flush
+
+
+    def set_color_space(self, color_space):
+        if(color_space != self.color_space):
+            self.color_space = color_space
+            self.need_flush = True
+
+
+    def set_brightness(self, brightness):
+        if(brightness != self.brightness):
+            self.brightness = brightness
+            self.need_flush = True
+
+    def set_contrast(self, contrast):
+        if(contrast != self.contrast):
+            self.contrast = contrast
+            self.need_flush = True
+
+    def set_hue(self, hue):
+        if(hue != self.hue):
+            self.hue = hue
+            self.need_flush = True
+
+    def set_saturation(self, saturation):
+        if(saturation != self.saturation):
+            self.saturation = saturation
+            self.need_flush = True
+
+
 class RawImageEditorParams():
     def __init__(self):
         self.need_flush = False
@@ -310,6 +370,7 @@ class RawImageEditorParams():
             CCMParams(),
             GammaParams(),
             LTMParams(),
+            CSCParams(),
         ]
 
         [
@@ -322,6 +383,7 @@ class RawImageEditorParams():
             self.ccm_params,
             self.gamma_params,
             self.ltm_params,
+            self.csc_params,
         ] = self.ui_params
 
 

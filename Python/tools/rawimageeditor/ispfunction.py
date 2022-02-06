@@ -11,4 +11,5 @@ pipeline_dict = {
     "ccm"                               :                     isp.IspCCM_Python,
     "gamma"                             :                     isp.IspGamma_Python,
     "ltm"                               :                     isp.IspLTM_Python,
+    "csc"                               :                     isp.IspCSC_Python,
 }

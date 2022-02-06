@@ -2,6 +2,7 @@ from tools.rawimageeditor.ImageInfo import ImageInfo
 from tools.rawimageeditor.RawImageEditorParams import RawImageEditorParams
 
 import numpy as np
+import math
 import ctypes
 
 from tools.rawimageeditor.isp_utils import isp_dpc
@@ -342,6 +343,108 @@ def IspLTM_Python(raw: ImageInfo, params: RawImageEditorParams):
         return ret_img
     else:
         DEBUGMK(sys._getframe().f_code.co_name, __file__, str(sys._getframe().f_lineno), "LTM need RGB data!")
+        return None
+
+
+""" CSC """
+def IspCSC_Python(raw: ImageInfo, params: RawImageEditorParams):
+    """
+    function: CSC色彩空间转换，从BGR色彩空间转换成YUV，并可以调节亮度、对比度、色调、饱和度
+
+    原理：
+    模拟海思的算法
+    对比度调整：
+        contrast * (rgb - 128) + 128，先减去128，然后乘以相应的倍数，最后在加上128
+    亮度调整：
+        整张图像同时加减一个值
+    色调调整：
+        cb = cb * cos(m) + cr * sin(m);
+        cr = cr * cos(m) - cb * sin(m); 其中m从-180度到180度变化
+    饱和度调整：
+        UV同时乘以一个值
+    总公式：
+        saturation * hue * csc * (contrast * (RGB - 128) + 128 + luma)
+
+    注意:
+    1. YUV没有负值，Y,Cr,Cb最高位为符号位，U = Cr + 128;V = Cb +128
+    2. 在8bit位深前提下，TV标准的yuv范围是16-235，PC标准的yuv范围是0-255，而RGB全是0-255
+    3. Cb为蓝色色度分量，对应U；Cr为红色色度分量，对应V
+
+    参考:
+    http://avisynth.nl/index.php/Color_conversions
+    ITU-R BT.709-6标准：https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-6-201506-I!!PDF-C.pdf
+    """
+
+    # 各个标准的YUV转换矩阵值kr,kb,kg
+    kr_kb_dict = {
+        "BT601": [0.299, 0.114],
+        "BT709": [0.2126, 0.0722],
+        "BT2020": [0.2627, 0.0593]
+    }
+
+    kr = kr_kb_dict[params.csc_params.color_space][0]
+    kb = kr_kb_dict[params.csc_params.color_space][1]
+    kg = 1 - (kr + kb)
+
+    brightness = (params.csc_params.brightness - 50) / 50 * 32
+    contrast = params.csc_params.contrast / 50
+    hue = (params.csc_params.hue - 50 ) / 50
+    saturation = params.csc_params.saturation / 50
+
+    maxvalue = raw.max_data
+    ratio = (maxvalue + 1) / 256
+
+    # raw_data = raw.get_raw_data()
+    data = raw.get_data().copy()
+
+    # RGB转YCRCB/YVU矩阵
+    csc = np.array([
+        [kr, kg, kb],
+        [0.5, -0.5 * kg/(1-kr), -0.5 * kb/(1-kr)],
+        [-0.5 * kr/(1-kb), -0.5 * kg/(1-kb), 0.5],
+    ])
+
+    if (raw.get_color_space() == "RGB"):
+        blackin = -128 * ratio
+        blackout = (brightness + 128) * ratio
+
+        # DebugMK
+        # if(params.csc.limitrange == 2):
+        #     csc_ratio = np.array([219/255, 224/255, 224/255]).reshape((3,1))
+        # else:
+        #     csc_ratio = 1
+        csc_ratio = 1
+
+        # 色调和饱和度调整矩阵
+        adjust_matrix = np.array([
+            [1., 0., 0.],
+            [0., saturation * math.cos(hue * math.pi), -saturation * math.sin(hue * math.pi)],
+            [0., saturation * math.sin(hue * math.pi), saturation * math.cos(hue * math.pi)]
+        ])
+
+        data = data + blackin
+        B, G, R = cv2.split(data)
+
+        matrix = np.dot(adjust_matrix, csc * csc_ratio * contrast)
+
+        # 由于加减RGB=128时，CrCb的值都为0，可以进行化简
+        Y  = matrix[0][0] * R + matrix[0][1] * G + matrix[0][2] * B + blackout
+        Cr = matrix[1][0] * R + matrix[1][1] * G + matrix[1][2] * B
+        Cb = matrix[2][0] * R + matrix[2][1] * G + matrix[2][2] * B
+        data = cv2.merge([Y,Cr,Cb])
+        # clip
+        data[:, :, 0] = np.clip(data[:,:,0], 0, maxvalue)
+        data[:, :, 1:] = np.clip(data[:,:,1:], -maxvalue/2, maxvalue/2)
+        data = data.astype(np.float32)
+
+        ret_img = ImageInfo()
+        ret_img.set_color_space("YCrCb")
+        ret_img.set_bit_depth_src(params.rawformat.bit_depth)
+        ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
+        ret_img.data = data
+        return ret_img
+    else:
+        DEBUGMK(sys._getframe().f_code.co_name, __file__, str(sys._getframe().f_lineno), "CSC need RGB data!")
         return None
 
 
