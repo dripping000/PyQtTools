@@ -355,6 +355,63 @@ class CSCParams():
             self.need_flush = True
 
 
+class DenoiseParams():
+    def __init__(self):
+        self.noise_threshold = [50, 50, 50]
+        self.denoise_strength = [50, 50, 50]
+        self.noise_weight = [50, 50, 50]
+
+        self.color_denoise_strength = 50
+
+        self.name = 'yuv denoise'
+        self.need_flush = False
+
+
+    def set(self, ui:Ui_ImageEditor):
+        ui.noise_threshold_l.setValue(self.noise_threshold[0])
+        ui.noise_threshold_m.setValue(self.noise_threshold[1])
+        ui.noise_threshold_h.setValue(self.noise_threshold[2])
+        ui.denoise_strength_l.setValue(self.denoise_strength[0])
+        ui.denoise_strength_m.setValue(self.denoise_strength[1])
+        ui.denoise_strength_h.setValue(self.denoise_strength[2])
+        ui.noise_weight_l.setValue(self.noise_weight[0])
+        ui.noise_weight_m.setValue(self.noise_weight[1])
+        ui.noise_weight_h.setValue(self.noise_weight[2])
+        ui.color_denoise_strength.setValue(self.color_denoise_strength)
+
+
+    def get(self, ui:Ui_ImageEditor):
+        self.set_noise_threshold([ui.noise_threshold_l.value(), ui.noise_threshold_m.value(), ui.noise_threshold_h.value()])
+        self.set_denoise_strength([ui.denoise_strength_l.value(), ui.denoise_strength_m.value(), ui.denoise_strength_h.value()])
+        self.set_noise_weight([ui.noise_weight_l.value(), ui.noise_weight_m.value(), ui.noise_weight_h.value()])
+        self.set_color_denoise_strength(ui.color_denoise_strength.value())
+        return self.need_flush
+
+
+    def set_noise_threshold(self, noise_threshold):
+        if(noise_threshold != self.noise_threshold):
+            self.noise_threshold = noise_threshold
+            self.need_flush = True
+
+
+    def set_denoise_strength(self, denoise_strength):
+        if(denoise_strength != self.denoise_strength):
+            self.denoise_strength = denoise_strength
+            self.need_flush = True
+
+
+    def set_noise_weight(self, noise_weight):
+        if(noise_weight != self.noise_weight):
+            self.noise_weight = noise_weight
+            self.need_flush = True
+
+
+    def set_color_denoise_strength(self, color_denoise_strength):
+        if(color_denoise_strength != self.color_denoise_strength):
+            self.color_denoise_strength = color_denoise_strength
+            self.need_flush = True
+
+
 class RawImageEditorParams():
     def __init__(self):
         self.need_flush = False
@@ -371,6 +428,7 @@ class RawImageEditorParams():
             GammaParams(),
             LTMParams(),
             CSCParams(),
+            DenoiseParams(),
         ]
 
         [
@@ -384,6 +442,7 @@ class RawImageEditorParams():
             self.gamma_params,
             self.ltm_params,
             self.csc_params,
+            self.denoise_params,
         ] = self.ui_params
 
 
