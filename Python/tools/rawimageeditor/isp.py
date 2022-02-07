@@ -484,7 +484,7 @@ def IspDenoise_Python(raw: ImageInfo, params: RawImageEditorParams):
     @color_denoise_strength：色度降噪强度，值越大，色度降噪越强
     """
     # print(params.denoise_params.noise_threshold, params.denoise_params.denoise_strength, params.denoise_params.noise_weight, params.denoise_params.color_denoise_strength)
-    noise_threshold = params.denoise_params.noise_threshold
+    noise_threshold = params.denoise_params.noise_threshold/100 * raw.max_data
     denoise_strength = params.denoise_params.denoise_strength
     noise_weight = params.denoise_params.noise_weight
     color_denoise_strength = params.denoise_params.color_denoise_strength
