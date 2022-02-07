@@ -13,4 +13,5 @@ pipeline_dict = {
     "ltm"                               :                     isp.IspLTM_Python,
     "csc"                               :                     isp.IspCSC_Python,
     "yuv denoise"                       :                     isp.IspDenoise_Python,
+    "yuv sharpen"                       :                     isp.IspSharpen_Python,
 }

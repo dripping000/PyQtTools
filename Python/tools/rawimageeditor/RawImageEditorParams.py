@@ -357,11 +357,11 @@ class CSCParams():
 
 class DenoiseParams():
     def __init__(self):
-        self.noise_threshold = [50, 50, 50]
-        self.denoise_strength = [50, 50, 50]
-        self.noise_weight = [50, 50, 50]
+        self.noise_threshold = [50, 50, 50]     # [0, 100]
+        self.denoise_strength = [50, 50, 50]    # [0, 100]
+        self.noise_weight = [50, 50, 50]        # [0, 100]
 
-        self.color_denoise_strength = 50
+        self.color_denoise_strength = 50        # [0, 100]
 
         self.name = 'yuv denoise'
         self.need_flush = False
@@ -412,6 +412,56 @@ class DenoiseParams():
             self.need_flush = True
 
 
+class SharpenParams():
+    def __init__(self):
+        self.medianblur_strength = 0    # [0, 100]
+        self.sharpen_strength = 5       # [0, 5]
+        self.clip_range = 64            # [0, 128]
+        self.denoise_threshold = 50     # [0, 250]
+
+        self.name = 'yuv sharpen'
+        self.need_flush = False
+
+
+    def set(self, ui:Ui_ImageEditor):
+        ui.medianblur_strength.setValue(self.medianblur_strength)
+        ui.sharpen_strength.setValue(self.sharpen_strength)
+        ui.clip_range.setValue(self.clip_range)
+        ui.denoise_threshold.setValue(self.denoise_threshold)
+
+
+    def get(self, ui:Ui_ImageEditor):
+        self.set_medianblur_strength(ui.medianblur_strength.value())
+        self.set_sharpen_strength(ui.sharpen_strength.value())
+        self.set_clip_range(ui.clip_range.value())
+        self.set_denoise_threshold(ui.denoise_threshold.value())
+        return self.need_flush
+
+
+    def set_medianblur_strength(self, medianblur_strength):
+        if(medianblur_strength != self.medianblur_strength):
+            self.medianblur_strength = medianblur_strength
+            self.need_flush = True
+
+
+    def set_sharpen_strength(self, sharpen_strength):
+        if(sharpen_strength != self.sharpen_strength):
+            self.sharpen_strength = sharpen_strength
+            self.need_flush = True
+
+
+    def set_clip_range(self, clip_range):
+        if(clip_range != self.clip_range):
+            self.clip_range = clip_range
+            self.need_flush = True
+
+
+    def set_denoise_threshold(self, denoise_threshold):
+        if(denoise_threshold != self.denoise_threshold):
+            self.denoise_threshold = denoise_threshold
+            self.need_flush = True
+
+
 class RawImageEditorParams():
     def __init__(self):
         self.need_flush = False
@@ -429,6 +479,7 @@ class RawImageEditorParams():
             LTMParams(),
             CSCParams(),
             DenoiseParams(),
+            SharpenParams(),
         ]
 
         [
@@ -443,6 +494,7 @@ class RawImageEditorParams():
             self.ltm_params,
             self.csc_params,
             self.denoise_params,
+            self.sharpen_params,
         ] = self.ui_params
 
 

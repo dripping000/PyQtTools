@@ -483,6 +483,7 @@ def IspDenoise_Python(raw: ImageInfo, params: RawImageEditorParams):
     @noise_weight：降噪权重，值越大，降噪越强，值为0的时候，就不进行降噪
     @color_denoise_strength：色度降噪强度，值越大，色度降噪越强
     """
+    # print(params.denoise_params.noise_threshold, params.denoise_params.denoise_strength, params.denoise_params.noise_weight, params.denoise_params.color_denoise_strength)
     noise_threshold = params.denoise_params.noise_threshold
     denoise_strength = params.denoise_params.denoise_strength
     noise_weight = params.denoise_params.noise_weight
@@ -532,6 +533,97 @@ def IspDenoise_Python(raw: ImageInfo, params: RawImageEditorParams):
         return ret_img
     else:
         DEBUGMK(sys._getframe().f_code.co_name, __file__, str(sys._getframe().f_lineno), "YUV Denoise need YCrCb data!")
+        return None
+
+
+""" YUV Sharpen """
+def IspSharpen_Python(raw: ImageInfo, params: RawImageEditorParams):
+    """
+    func: yuv域的锐化
+    原理：高通算法 https://image.qinxing.xyz/20210413231951.png
+    1. 先进行一个3x3的中值滤波得到图Xm，sp是中值滤波的强度 𝑋𝑚 = sp * media(X) + (1 - sp) * X
+    2. 利用垂直和水平两个边缘检测滤波器对图Xm进行边缘检测，输出的图像作用在LUT权重表1(weight table)上得到一个锐化强度表Xw，强度可以大于1，
+    作用在LUT权重表2(sharpening weight)得到一个锐化权重α，范围为[0,1]
+    3. 对图Xm进行7x7的高通滤波，与锐化强度表Xw相乘，仅增强图像的边缘，得到锐化后的图像Xedge，然后对Xedge进行反差的限制
+    4. 对图Xm进行7x7的低通滤波得到图像基础层Xsmooth
+    5. 对Xedge乘以锐化权重α，对Xsmooth乘以(1-α)，两者相加得到最后的Xout。公式为Y = α * Y_HPF + (1-α) * Y_LPF
+    """
+    # print(params.sharpen_params.medianblur_strength, params.sharpen_params.sharpen_strength, params.sharpen_params.clip_range, params.sharpen_params.denoise_threshold)
+    sp = params.sharpen_params.medianblur_strength/100
+    sharpen_strength = params.sharpen_params.sharpen_strength
+    clip_range = params.sharpen_params.clip_range/128 * raw.max_data
+    denoise_threshold = params.sharpen_params.denoise_threshold/250 * raw.max_data
+
+    data = raw.get_data().copy()
+
+    edge_kernel = np.array([
+        [      0,       0,      0,      0,      0,       0,       0],
+        [-0.0208, -0.0208, 0.0208, 0.0417, 0.0208, -0.0208, -0.0208],
+        [-0.0833, -0.0833, 0.0833, 0.1667, 0.0833, -0.0833, -0.0833],
+        [-0.1250, -0.1250, 0.1250, 0.2500, 0.1250, -0.1250, -0.1250],
+        [-0.0833, -0.0833, 0.0833, 0.1667, 0.0833, -0.0833, -0.0833],
+        [-0.0208, -0.0208, 0.0208, 0.0417, 0.0208, -0.0208, -0.0208],
+        [      0,       0,      0,      0,      0,       0,       0]
+    ], dtype=np.float32)
+
+    hpf_kernel = np.array([
+        [-0.0012, -0.0044, 0.0262, -0.0357, 0.0262, -0.0044, -0.0012],
+        [ 0.0170, -0.0625, 0.0291,  0.0541, 0.0291, -0.0625, -0.0170],
+        [-0.0287, -0.1027, 0.0016,  0.2298, 0.0016, -0.1027, -0.0287],
+        [-0.0003, -0.1456, 0.0331,  0.2317, 0.0331, -0.1456, -0.0003],
+        [-0.0287, -0.1027, 0.0016,  0.2298, 0.0016, -0.1027, -0.0287],
+        [ 0.0170, -0.0625, 0.0291,  0.0541, 0.0291, -0.0625, -0.0170],
+        [-0.0012, -0.0044, 0.0262, -0.0357, 0.0262, -0.0044, -0.0012],
+    ], dtype=np.float32)
+
+    lpf_kernel = np.array([
+        [0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067],
+        [0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292],
+        [0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117],
+        [0.00038771, 0.01330373, 0.11098164, 0.22508352, 0.11098164, 0.01330373, 0.00038771],
+        [0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117],
+        [0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292],
+        [0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067],
+    ], dtype=np.float32)
+
+    if (raw.get_color_space() == "YCrCb"):
+        Y = data[:, :, 0]
+
+        # 步骤1 进行一定权重的3x3的中值滤波
+        media = cv2.medianBlur(Y, 3)
+        Xm = sp * media + (1 - sp) * Y
+        del media
+
+        # 步骤2.1 由于高通水平垂直边缘检测器以及水平垂直方向上的高通滤波器都是一样的，我这里就简化成一个
+        edge = np.abs(cv2.filter2D(Xm, -1, edge_kernel))
+
+        # 步骤2.2 高通是自定义锐化权重LUT表，为了简化我就用一个denoise_threshold
+        # 将锐化和降噪的区间区分开来，LUT曲线采用sigmod函数：1/(1+exp(-x))
+        alpha = 1/(1 + np.exp(-0.1 * (edge-denoise_threshold)))
+
+        # 步骤2.3 高通是自定义锐化强度LUT表，为了简化我利用alpha权重表进行一个比例的缩放，得到锐化强度Xw
+        Xw = sharpen_strength * alpha
+
+        # 步骤3 对图Xm进行7x7的高通滤波，与锐化强度表Xw相乘，尽量仅增强图像的边缘，得到锐化后的图像Xedge，然后对Xedge进行反差的限制
+        Xedge = cv2.filter2D(Xm, -1, hpf_kernel)
+        after_clip = np.clip(Xedge * Xw, -clip_range, clip_range)
+        Y_HPF = (after_clip + Xm)
+
+        # 步骤4 对图Xm进行7x7的低通滤波得到图像基础层Xsmooth
+        Y_LPF = cv2.filter2D(Xm, -1, lpf_kernel)
+
+        # 步骤5 对Xedge乘以锐化权重α, 对Xsmooth乘以(1-α) , 两者相加得到最后的Xout. 公式为Y = α ⋅ Y_HPF + (1−α) ⋅ Y_LPF
+        data[:, :, 0] = alpha * Y_HPF + (1 - alpha) * Y_LPF
+        data[:, :, 1:] = data[:, :, 1:]
+
+        ret_img = ImageInfo()
+        ret_img.set_color_space("YCrCb")
+        ret_img.set_bit_depth_src(params.rawformat.bit_depth)
+        ret_img.set_bit_depth_dst(params.rawformat.bit_depth)
+        ret_img.data = data
+        return ret_img
+    else:
+        DEBUGMK(sys._getframe().f_code.co_name, __file__, str(sys._getframe().f_lineno), "YUV Sharpen need YCrCb data!")
         return None
 
 
