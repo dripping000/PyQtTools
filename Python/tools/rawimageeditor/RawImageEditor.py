@@ -7,6 +7,8 @@ from tools.rawimageeditor.RawImageEditorParams import RawImageEditorParams
 
 import os
 
+import cv2
+
 from components.window import SubWindow
 from components.customwidget import ImageView
 
@@ -42,6 +44,7 @@ class RawImageEditor(SubWindow):
         # 界面控制
         self.ui.open_image.clicked.connect(self.open_image)
         self.ui.pipeline_ok.clicked.connect(self.update_pipeline)
+        self.ui.save_image.clicked.connect(self.save_current_image)
         self.ui.select_from_raw.clicked.connect(self.select_from_raw)
         # 信号与槽
         self.imageview.signalDragEvent.connect(self.update_filename)
@@ -121,6 +124,14 @@ class RawImageEditor(SubWindow):
     def update_display_image(self):
         self.c_ImageInfo = self.c_IspPipeline.get_IspPipeline_list(-1)
         self.display_image(self.c_ImageInfo)
+
+
+    def save_current_image(self):
+        if (self.c_ImageInfo.get_data() is not None):
+            imagepath = QFileDialog.getSaveFileName(
+                None, '保存图片', './', "Images (*.bmp)")
+            if(imagepath[0] != ""):
+                cv2.imencode('.bmp', self.c_ImageInfo.display_data)[1].tofile(imagepath[0])
 
 
     # 更新进度条和时间
