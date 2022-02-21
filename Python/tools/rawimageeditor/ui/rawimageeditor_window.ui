@@ -545,7 +545,7 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-143</y>
+              <y>-538</y>
               <width>370</width>
               <height>785</height>
              </rect>
@@ -1474,21 +1474,21 @@
                 <item row="0" column="8">
                  <widget class="QSpinBox" name="blc_b">
                   <property name="maximum">
-                   <number>10000</number>
+                   <number>65535</number>
                   </property>
                  </widget>
                 </item>
                 <item row="0" column="6">
                  <widget class="QSpinBox" name="blc_gb">
                   <property name="maximum">
-                   <number>1000</number>
+                   <number>65535</number>
                   </property>
                  </widget>
                 </item>
                 <item row="0" column="4">
                  <widget class="QSpinBox" name="blc_gr">
                   <property name="maximum">
-                   <number>10000</number>
+                   <number>65535</number>
                   </property>
                  </widget>
                 </item>
@@ -1509,7 +1509,7 @@
                 <item row="0" column="2">
                  <widget class="QSpinBox" name="blc_r">
                   <property name="maximum">
-                   <number>10000</number>
+                   <number>65535</number>
                   </property>
                  </widget>
                 </item>
